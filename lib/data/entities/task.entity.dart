@@ -102,6 +102,11 @@ class TaskEntity extends Equatable {
         .get();
   }
 
+  Stream<List<TaskEntity>> queryAllTasks() {
+    AppDatabase instance = AppDatabase();
+    return (instance.select(instance.taskItems)).watch();
+  }
+
   factory TaskEntity.fromJson(Map<String, dynamic> json) =>
       _$TaskEntityFromJson(json);
 

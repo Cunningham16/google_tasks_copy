@@ -1,9 +1,15 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import 'feature/routes/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterError.onError = (details) {
+    log(details.exceptionAsString(), stackTrace: details.stack);
+  };
 
   runApp(const MyApp());
 }

@@ -1,6 +1,6 @@
 import 'package:google_tasks/data/entities/category.entity.dart';
 
-class CategoryRepository {
+abstract class CategoryRepository {
   const CategoryRepository({
     required CategoryEntity categoryEntity,
   }) : _categoryEntity = categoryEntity;
@@ -15,6 +15,6 @@ class CategoryRepository {
 
   Future<void> deleteCategory(int id) => _categoryEntity.delete(id);
 
-  Future<List<CategoryEntity>> getCategories() =>
+  Stream<List<CategoryEntity>> getCategories() =>
       _categoryEntity.queryCategories();
 }

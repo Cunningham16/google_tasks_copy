@@ -61,9 +61,9 @@ class CategoryEntity extends Equatable {
         .go();
   }
 
-  Future<List<CategoryEntity>> queryCategories() async {
+  Stream<List<CategoryEntity>> queryCategories() {
     AppDatabase instance = AppDatabase();
-    return (instance.select(instance.taskCategories)).get();
+    return (instance.select(instance.taskCategories)).watch();
   }
 
   factory CategoryEntity.fromJson(Map<String, dynamic> json) =>

@@ -1,6 +1,6 @@
 import 'package:google_tasks/data/entities/task.entity.dart';
 
-class TaskRepository {
+abstract class TaskRepository {
   const TaskRepository({
     required TaskEntity taskEntity,
   }) : _taskEntity = taskEntity;
@@ -22,4 +22,6 @@ class TaskRepository {
 
   Future<List<TaskEntity>> getTasksByFavorites() =>
       _taskEntity.queryTaskByFavorites();
+
+  Stream<List<TaskEntity>> getAllTasks() => _taskEntity.queryAllTasks();
 }
