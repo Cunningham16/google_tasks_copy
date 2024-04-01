@@ -8,7 +8,7 @@ part of 'category.entity.dart';
 
 CategoryEntity _$CategoryEntityFromJson(Map<String, dynamic> json) =>
     CategoryEntity(
-      id: json['id'] as int,
+      id: json['id'] as int?,
       name: json['name'] as String,
       sortType: json['sortType'] as int? ?? 0,
       isDeleteable: json['isDeleteable'] as bool? ?? true,

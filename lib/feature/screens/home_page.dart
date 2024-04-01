@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_tasks/feature/task_bloc/task_bloc.dart';
 
 import '../components/bottom_bar.dart';
 import '../components/category_button.dart';
@@ -16,12 +18,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      initialIndex: 0,
-      length: 4,
-      child: Scaffold(
-        body: NestedScrollView(
+    return BlocBuilder<TaskBloc, TaskState>(builder: (context, state) {
+      return DefaultTabController(
+        initialIndex: 0,
+        length: 1 + state.categoryList.length,
+        child: Scaffold(
+          body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 SliverAppBar(
@@ -36,16 +44,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     "Задачи",
                   ),
                   bottom: TabBar(
-                    tabs: <Widget>[
-                      const CategoryButton(
-                        icon: Icon(
-                          Icons.star,
-                          size: 20,
-                        ),
-                      ),
-                      const CategoryButton(title: "Сегодня"),
-                      const CategoryButton(title: "Сегодня"),
-                      Tab(
+                    tabs: List.from(state.categoryList
+                        .map((e) => CategoryButton(category: e))
+                        .toList())
+                      ..add(Tab(
                         child: InkWell(
                           onTap: () =>
                               context.go("/${RoutesLocation.createList}"),
@@ -57,19 +59,24 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
-                      )
-                    ],
+                      )),
                     isScrollable: true,
                   ),
                 ),
               ];
             },
-            body: const TabBarView(
-              children: [TaskList(), TaskList(), TaskList()],
-            )),
-        bottomNavigationBar: const BottomBar(),
-        drawerScrimColor: Colors.blue,
-      ),
-    );
+            body: TabBarView(
+              children: state.categoryList
+                  .map((e) => TaskList(
+                      filteredList: state.taskList
+                          .where((element) => element.categoryId == e.id)))
+                  .toList(),
+            ),
+          ),
+          bottomNavigationBar: const BottomBar(),
+          drawerScrimColor: Colors.blue,
+        ),
+      );
+    });
   }
 }

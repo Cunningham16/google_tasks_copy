@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:google_tasks/data/entities/category.entity.dart';
 import 'package:google_tasks/data/entities/task.entity.dart';
 import 'package:google_tasks/domain/task.repository.dart';
 
@@ -15,6 +16,10 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<TaskDeletionRequest>(_onTaskDeletionRequest);
     on<TaskUpdateRequest>(_onTaskUpdateRequest);
     on<TaskCreateRequest>(_onTaskCreateRequest);
+    on<CategoryCreateRequest>(_onCategoryCreateRequest);
+    on<CategoryDeleteRequest>(_onCategoryDeleteRequest);
+    on<CategorySubscribeRequest>(_onCategorySubscribeRequest);
+    on<CategoryUpdateRequest>(_onCategoryUpdateRequest);
   }
 
   final TaskRepository _taskRepository;
@@ -34,7 +39,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   Future<void> _onTaskCompletionToggled(
       TaskCompletionToggled event, Emitter<TaskState> emit) async {
     final newTask = event.task.copyWith(isCompleted: event.isCompleted);
-    await _taskRepository.updateTask(newTask.id, newTask);
+    await _taskRepository.updateTask(newTask.id as int, newTask);
   }
 
   Future<void> _onTaskDeletionRequest(
@@ -50,5 +55,26 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   Future<void> _onTaskCreateRequest(
       TaskCreateRequest event, Emitter<TaskState> emit) async {
     await _taskRepository.saveTask(event.task);
+  }
+
+  Future<void> _onCategoryCreateRequest(
+      CategoryCreateRequest event, Emitter<TaskState> emit) async {
+    await _taskRepository.saveCategory(event.category);
+  }
+
+  Future<void> _onCategoryDeleteRequest(
+      CategoryDeleteRequest event, Emitter<TaskState> emit) async {
+    await _taskRepository.deleteCategory(event.id);
+  }
+
+  Future<void> _onCategorySubscribeRequest(
+      CategorySubscribeRequest event, Emitter<TaskState> emit) async {
+    await emit.forEach(_taskRepository.getCategories(),
+        onData: (categories) => state.copyWith(categoryList: () => categories));
+  }
+
+  Future<void> _onCategoryUpdateRequest(
+      CategoryUpdateRequest event, Emitter<TaskState> emit) async {
+    await _taskRepository.updateCategory(event.id, event.categoryEntity);
   }
 }
