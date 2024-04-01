@@ -38,6 +38,80 @@ class TaskItems extends Table {
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  Future<void> saveCategory(CategoryEntity categoryEntity) async {
+    await into(taskCategories)
+        .insertOnConflictUpdate(categoryEntity.toCompanion());
+  }
+
+  Future<void> updateCategory(int id, CategoryEntity newCategory) async {
+    await (update(taskCategories)..where((tbl) => tbl.id.equals(id)))
+        .write(newCategory.toCompanion());
+  }
+
+  Future<void> deleteCategory(int id) async {
+    await (delete(taskCategories)
+          ..where((tbl) => tbl.id.equals(id) | tbl.isDeletable.isValue(true)))
+        .go();
+    await (delete(taskItems)..where((tbl) => tbl.category.equals(id))).go();
+  }
+
+  Stream<List<CategoryEntity>> queryCategories() {
+    return (select(taskCategories)).watch();
+  }
+
+  Future<void> saveTask(TaskEntity entity) async {
+    await into(taskItems).insertOnConflictUpdate(entity.toCompanion());
+  }
+
+  Future<void> deleleTask(int id) async {
+    await (delete(taskItems)..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  Future<void> updateTask(int id, TaskEntity taskEntity) async {
+    await (update(taskItems)..where((tbl) => tbl.id.equals(id)))
+        .write(taskEntity.toCompanion());
+  }
+
+  Future<List<TaskEntity>> queryTasksByCategory(int categoryId) async {
+    return (select(taskItems)..where((tbl) => tbl.category.equals(categoryId)))
+        .get();
+  }
+
+  Future<TaskEntity?> querySingleTask(int taskId) async {
+    return (select(taskItems)..where((tbl) => tbl.id.equals(taskId)))
+        .getSingleOrNull();
+  }
+
+  Future<List<TaskEntity>> queryTaskByFavorites() async {
+    return (select(taskItems)..where((tbl) => tbl.isFavorite.isValue(true)))
+        .get();
+  }
+
+  Stream<List<TaskEntity>> queryAllTasks() {
+    return (select(taskItems)).watch();
+  }
+
+  Future<void> deleteTable() async {
+    return transaction(() async {
+      for (final table in allTables) {
+        await delete(table).go();
+      }
+    });
+  }
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(onCreate: (Migrator m) async {
+      await m.createAll();
+      await into(taskCategories).insert(
+          const CategoryEntity(name: "Избранное", isDeleteable: false)
+              .toCompanion());
+      await into(taskCategories).insert(
+          const CategoryEntity(name: "Мои задачи", isDeleteable: false)
+              .toCompanion());
+    });
+  }
+
   @override
   int get schemaVersion => 1;
 }

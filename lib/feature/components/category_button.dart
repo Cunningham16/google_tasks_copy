@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:google_tasks/data/entities/category.entity.dart';
 
 class CategoryButton extends StatelessWidget {
-  const CategoryButton({super.key, this.title, this.icon});
+  const CategoryButton({super.key, required this.category});
 
-  final String? title;
-  final Widget? icon;
+  final CategoryEntity category;
 
   @override
   Widget build(BuildContext context) {
-    return Tab(child: title != null ? const Text("Сегодня") : icon);
+    return Tab(
+        child: Row(children: [
+      Text(category.name),
+    ]));
   }
 }

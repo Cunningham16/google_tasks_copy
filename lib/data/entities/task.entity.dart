@@ -12,14 +12,14 @@ class TaskEntity extends Equatable {
   const TaskEntity(
       {this.categoryId = 0,
       this.isCompleted = false,
-      required this.id,
+      this.id,
       this.isFavorite = false,
       this.content = '',
       required this.title,
       this.date = '',
       this.time = ''});
 
-  final int id;
+  final int? id;
   final String title;
   final String content;
   final int categoryId;
@@ -50,7 +50,7 @@ class TaskEntity extends Equatable {
 
   TaskItemsCompanion toCompanion() {
     return TaskItemsCompanion(
-        id: Value(id),
+        id: Value(id ?? -1),
         title: Value(title),
         content: Value(content),
         category: Value(categoryId),
@@ -60,53 +60,6 @@ class TaskEntity extends Equatable {
         time: Value(time));
   }
 
-  Future<void> save(TaskEntity entity) async {
-    AppDatabase instance = AppDatabase();
-    await instance
-        .into(instance.taskItems)
-        .insertOnConflictUpdate(entity.toCompanion());
-  }
-
-  Future<void> delele(int id) async {
-    AppDatabase instance = AppDatabase();
-    await (instance.delete(instance.taskItems)
-          ..where((tbl) => tbl.id.equals(id)))
-        .go();
-  }
-
-  Future<void> update(int id, TaskEntity taskEntity) async {
-    AppDatabase instance = AppDatabase();
-    await (instance.update(instance.taskItems)
-          ..where((tbl) => tbl.id.equals(id)))
-        .write(taskEntity.toCompanion());
-  }
-
-  Future<List<TaskEntity>> queryTasksByCategory(int categoryId) async {
-    AppDatabase instance = AppDatabase();
-    return (instance.select(instance.taskItems)
-          ..where((tbl) => tbl.category.equals(categoryId)))
-        .get();
-  }
-
-  Future<TaskEntity?> querySingleTask(int taskId) async {
-    AppDatabase instance = AppDatabase();
-    return (instance.select(instance.taskItems)
-          ..where((tbl) => tbl.id.equals(taskId)))
-        .getSingleOrNull();
-  }
-
-  Future<List<TaskEntity>> queryTaskByFavorites() async {
-    AppDatabase instance = AppDatabase();
-    return (instance.select(instance.taskItems)
-          ..where((tbl) => tbl.isFavorite.isValue(true)))
-        .get();
-  }
-
-  Stream<List<TaskEntity>> queryAllTasks() {
-    AppDatabase instance = AppDatabase();
-    return (instance.select(instance.taskItems)).watch();
-  }
-
   factory TaskEntity.fromJson(Map<String, dynamic> json) =>
       _$TaskEntityFromJson(json);
 
@@ -114,5 +67,5 @@ class TaskEntity extends Equatable {
 
   @override
   List<Object> get props =>
-      [id, title, content, date, time, categoryId, isCompleted, isFavorite];
+      [title, content, date, time, categoryId, isCompleted, isFavorite];
 }

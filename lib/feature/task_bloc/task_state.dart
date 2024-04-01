@@ -4,14 +4,20 @@ enum TasksStatus { initial, loading, success, failure }
 
 class TaskState extends Equatable {
   const TaskState(
-      {this.taskList = const [], this.status = TasksStatus.initial});
+      {this.categoryList = const [],
+      this.taskList = const [],
+      this.status = TasksStatus.initial});
 
   final List<TaskEntity> taskList;
+  final List<CategoryEntity> categoryList;
   final TasksStatus status;
 
   TaskState copyWith(
-      {List<TaskEntity> Function()? taskList, TasksStatus Function()? status}) {
+      {List<CategoryEntity> Function()? categoryList,
+      List<TaskEntity> Function()? taskList,
+      TasksStatus Function()? status}) {
     return TaskState(
+        categoryList: categoryList != null ? categoryList() : this.categoryList,
         taskList: taskList != null ? taskList() : this.taskList,
         status: status != null ? status() : this.status);
   }

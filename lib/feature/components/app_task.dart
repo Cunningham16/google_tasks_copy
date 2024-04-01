@@ -1,26 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_tasks/data/entities/task.entity.dart';
 import 'package:google_tasks/feature/components/task_checkbox.dart';
 
 import '../routes/routes.dart';
 
 class AppTask extends StatelessWidget {
-  const AppTask(
-      {super.key,
-      required this.title,
-      this.subtitle,
-      required this.isCompleted,
-      required this.isFavorite,
-      this.time,
-      this.date});
+  const AppTask({super.key, required this.task});
 
-  final String title;
-  final String? subtitle;
-  final String? time;
-  final String? date;
-  final bool isCompleted;
-  final bool isFavorite;
+  final TaskEntity task;
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +19,15 @@ class AppTask extends StatelessWidget {
         padding: const EdgeInsets.all(6),
         child: Row(
           children: [
-            TaskCheckbox(value: isCompleted),
+            TaskCheckbox(value: task.isCompleted),
             const Gap(10),
-            Expanded(child: Text(title)),
+            Expanded(child: Text(task.title)),
             IconButton(
                 onPressed: () {},
                 icon: Icon(
-                  isFavorite == true ? Icons.star : Icons.star_border_outlined,
+                  task.isFavorite == true
+                      ? Icons.star
+                      : Icons.star_border_outlined,
                   size: 20,
                 ))
           ],

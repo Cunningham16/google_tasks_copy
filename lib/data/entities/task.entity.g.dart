@@ -9,7 +9,7 @@ part of 'task.entity.dart';
 TaskEntity _$TaskEntityFromJson(Map<String, dynamic> json) => TaskEntity(
       categoryId: json['categoryId'] as int? ?? 0,
       isCompleted: json['isCompleted'] as bool? ?? false,
-      id: json['id'] as int,
+      id: json['id'] as int?,
       isFavorite: json['isFavorite'] as bool? ?? false,
       content: json['content'] as String? ?? '',
       title: json['title'] as String,

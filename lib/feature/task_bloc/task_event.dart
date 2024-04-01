@@ -49,3 +49,35 @@ final class TaskCreateRequest extends TaskEvent {
   @override
   List<Object> get props => [task];
 }
+
+class CategoryCreateRequest extends TaskEvent {
+  const CategoryCreateRequest(this.category);
+
+  final CategoryEntity category;
+
+  @override
+  List<Object> get props => [category];
+}
+
+class CategoryDeleteRequest extends TaskEvent {
+  const CategoryDeleteRequest(this.id);
+
+  final int id;
+
+  @override
+  List<Object> get props => [id];
+}
+
+class CategorySubscribeRequest extends TaskEvent {
+  const CategorySubscribeRequest();
+}
+
+class CategoryUpdateRequest extends TaskEvent {
+  const CategoryUpdateRequest(this.id, this.categoryEntity);
+
+  final int id;
+  final CategoryEntity categoryEntity;
+
+  @override
+  List<Object> get props => [id, categoryEntity];
+}

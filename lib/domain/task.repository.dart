@@ -1,27 +1,36 @@
+import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/entities/category.entity.dart';
 import 'package:google_tasks/data/entities/task.entity.dart';
 
-abstract class TaskRepository {
-  const TaskRepository({
-    required TaskEntity taskEntity,
-  }) : _taskEntity = taskEntity;
+class TaskRepository {
+  TaskRepository({
+    required AppDatabase db,
+  }) : _db = db;
 
-  final TaskEntity _taskEntity;
+  final AppDatabase _db;
 
-  Future<void> deleteTask(int id) => _taskEntity.delele(id);
+  Future<void> deleteTask(int id) => _db.deleleTask(id);
 
-  Future<void> saveTask(TaskEntity entity) => _taskEntity.save(entity);
+  Future<void> saveTask(TaskEntity entity) => _db.saveTask(entity);
 
   Future<void> updateTask(int id, TaskEntity taskEntity) =>
-      _taskEntity.update(id, taskEntity);
+      _db.updateTask(id, taskEntity);
 
   Future<List<TaskEntity>> getTasksByCategory(int categoryId) =>
-      _taskEntity.queryTasksByCategory(categoryId);
+      _db.queryTasksByCategory(categoryId);
 
-  Future<TaskEntity?> getSingleTask(int taskId) =>
-      _taskEntity.querySingleTask(taskId);
+  Future<TaskEntity?> getSingleTask(int taskId) => _db.querySingleTask(taskId);
 
-  Future<List<TaskEntity>> getTasksByFavorites() =>
-      _taskEntity.queryTaskByFavorites();
+  Future<List<TaskEntity>> getTasksByFavorites() => _db.queryTaskByFavorites();
 
-  Stream<List<TaskEntity>> getAllTasks() => _taskEntity.queryAllTasks();
+  Stream<List<TaskEntity>> getAllTasks() => _db.queryAllTasks();
+
+  Future<void> saveCategory(CategoryEntity entity) => _db.saveCategory(entity);
+
+  Future<void> updateCategory(id, newCategory) =>
+      _db.updateCategory(id, newCategory);
+
+  Future<void> deleteCategory(int id) => _db.deleteCategory(id);
+
+  Stream<List<CategoryEntity>> getCategories() => _db.queryCategories();
 }
