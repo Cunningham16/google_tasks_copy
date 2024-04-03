@@ -32,5 +32,7 @@ class TaskRepository {
 
   Future<void> deleteCategory(int id) => _db.deleteCategory(id);
 
-  Stream<List<CategoryEntity>> getCategories() => _db.queryCategories();
+  Stream<List<CategoryEntity>> watchCategories() => _db.watchCategories();
+
+  Future<List<CategoryEntity>> getCategories() => _db.getCategories();
 }

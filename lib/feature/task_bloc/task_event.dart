@@ -81,3 +81,7 @@ class CategoryUpdateRequest extends TaskEvent {
   @override
   List<Object> get props => [id, categoryEntity];
 }
+
+class CategoryGetRequest extends TaskEvent {
+  const CategoryGetRequest();
+}

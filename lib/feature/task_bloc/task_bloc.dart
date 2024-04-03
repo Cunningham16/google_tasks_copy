@@ -20,19 +20,20 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<CategoryDeleteRequest>(_onCategoryDeleteRequest);
     on<CategorySubscribeRequest>(_onCategorySubscribeRequest);
     on<CategoryUpdateRequest>(_onCategoryUpdateRequest);
+    //on<CategoryGetRequest>(_onCategoryGetRequest);
   }
 
   final TaskRepository _taskRepository;
 
   Future<void> _onSubcriptionRequested(
       TaskSubscriptionRequested event, Emitter<TaskState> emit) async {
-    emit(state.copyWith(status: () => TasksStatus.loading));
+    emit(state.copyWith(status: TasksStatus.loading));
 
     await emit.forEach(_taskRepository.getAllTasks(),
-        onData: (tasksList) => state.copyWith(
-            status: () => TasksStatus.success, taskList: () => tasksList),
+        onData: (tasksList) =>
+            state.copyWith(status: TasksStatus.success, taskList: tasksList),
         onError: (_, __) => state.copyWith(
-              status: () => TasksStatus.failure,
+              status: TasksStatus.failure,
             ));
   }
 
@@ -69,12 +70,26 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   Future<void> _onCategorySubscribeRequest(
       CategorySubscribeRequest event, Emitter<TaskState> emit) async {
-    await emit.forEach(_taskRepository.getCategories(),
-        onData: (categories) => state.copyWith(categoryList: () => categories));
+    emit(state.copyWith(categoryList: _taskRepository.watchCategories()));
+    //await emit.forEach(_taskRepository.watchCategories(), onData: (categories) {
+    //  return TaskState(
+    //      categoryList: categories,
+    //      taskList: state.taskList,
+    //      status: state.status);
+    //}, onError: (_, __) {
+    //  print("error!!");
+    //  throw UnimplementedError();
+    //});
   }
 
   Future<void> _onCategoryUpdateRequest(
       CategoryUpdateRequest event, Emitter<TaskState> emit) async {
     await _taskRepository.updateCategory(event.id, event.categoryEntity);
   }
+
+  //Future<void> _onCategoryGetRequest(
+  //    CategoryGetRequest event, Emitter<TaskState> emit) async {
+  //  List<CategoryEntity> categories = await _taskRepository.getCategories();
+  //  emit(state.copyWith(categoryList: categories));
+  //}
 }

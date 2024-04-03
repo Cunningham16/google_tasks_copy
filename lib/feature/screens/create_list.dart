@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_tasks/data/entities/category.entity.dart';
 import 'package:google_tasks/feature/task_bloc/task_bloc.dart';
-
-import '../routes/routes.dart';
 
 class CreateListScreen extends StatefulWidget {
   const CreateListScreen({super.key});
+
+  static Route<void> route(TaskBloc taskBloc) {
+    return MaterialPageRoute<void>(
+      builder: (_) => const CreateListScreen(),
+    );
+  }
 
   @override
   State<CreateListScreen> createState() => _CreateListState();
@@ -31,23 +33,18 @@ class _CreateListState extends State<CreateListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TaskBloc, TaskState>(
-      builder: (context, state) => Scaffold(
+    return BlocBuilder<TaskBloc, TaskState>(builder: (context, state) {
+      return Scaffold(
           appBar: AppBar(
             leading: IconButton(
               icon: const Icon(Icons.close),
-              onPressed: () => context.go(RoutesLocation.home),
+              onPressed: () => Navigator.of(context).pop(),
             ),
             title: const Text("Создание списка"),
             actions: [
               TextButton(
                   onPressed: text.isNotEmpty
-                      ? () {
-                          BlocProvider.of<TaskBloc>(context).add(
-                              CategoryCreateRequest(
-                                  CategoryEntity(name: text)));
-                          Navigator.pop(context);
-                        }
+                      ? () => Navigator.of(context).pop(text)
                       : null,
                   child: const Text("Готово"))
             ],
@@ -65,7 +62,7 @@ class _CreateListState extends State<CreateListScreen> {
                 onChanged: (text) => setText(text),
               ),
             ),
-          )),
-    );
+          ));
+    });
   }
 }

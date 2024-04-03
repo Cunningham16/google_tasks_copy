@@ -55,8 +55,12 @@ class AppDatabase extends _$AppDatabase {
     await (delete(taskItems)..where((tbl) => tbl.category.equals(id))).go();
   }
 
-  Stream<List<CategoryEntity>> queryCategories() {
+  Stream<List<CategoryEntity>> watchCategories() {
     return (select(taskCategories)).watch();
+  }
+
+  Future<List<CategoryEntity>> getCategories() {
+    return (select(taskCategories)).get();
   }
 
   Future<void> saveTask(TaskEntity entity) async {
