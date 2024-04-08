@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_tasks/feature/task_bloc/task_bloc.dart';
 
 class CreateListScreen extends StatefulWidget {
   const CreateListScreen({super.key});
 
-  static Route<void> route(TaskBloc taskBloc) {
+  static Route<void> route() {
     return MaterialPageRoute<void>(
       builder: (_) => const CreateListScreen(),
     );
@@ -33,36 +32,34 @@ class _CreateListState extends State<CreateListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TaskBloc, TaskState>(builder: (context, state) {
-      return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            title: const Text("Создание списка"),
-            actions: [
-              TextButton(
-                  onPressed: text.isNotEmpty
-                      ? () => Navigator.of(context).pop(text)
-                      : null,
-                  child: const Text("Готово"))
-            ],
+    return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                controller: controller,
-                autofocus: true,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: "Введите название списка",
-                    floatingLabelBehavior: FloatingLabelBehavior.never),
-                onChanged: (text) => setText(text),
-              ),
+          title: const Text("Создание списка"),
+          actions: [
+            TextButton(
+                onPressed: text.isNotEmpty
+                    ? () => Navigator.of(context).pop(text)
+                    : null,
+                child: const Text("Готово"))
+          ],
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: TextField(
+              controller: controller,
+              autofocus: true,
+              decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "Введите название списка",
+                  floatingLabelBehavior: FloatingLabelBehavior.never),
+              onChanged: (text) => setText(text),
             ),
-          ));
-    });
+          ),
+        ));
   }
 }

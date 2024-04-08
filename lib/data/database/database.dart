@@ -3,14 +3,13 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:google_tasks/data/entities/category.entity.dart';
-import 'package:google_tasks/data/entities/task.entity.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 
 part 'database.g.dart';
 
-@UseRowClass(CategoryEntity)
+@DataClassName("TaskCategory")
 class TaskCategories extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
@@ -19,7 +18,7 @@ class TaskCategories extends Table {
   IntColumn get sortType => integer().withDefault(const Constant(0))();
 }
 
-@UseRowClass(TaskEntity)
+@DataClassName("TaskItem")
 class TaskItems extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
@@ -38,60 +37,56 @@ class TaskItems extends Table {
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
-  Future<void> saveCategory(CategoryEntity categoryEntity) async {
-    await into(taskCategories)
-        .insertOnConflictUpdate(categoryEntity.toCompanion());
+  Future<void> saveCategory(
+      TaskCategoriesCompanion taskCategoriesCompanion) async {
+    await into(taskCategories).insertOnConflictUpdate(taskCategoriesCompanion);
   }
 
-  Future<void> updateCategory(int id, CategoryEntity newCategory) async {
+  Future<void> updateCategory(
+      int id, TaskCategoriesCompanion taskCategoriesCompanion) async {
     await (update(taskCategories)..where((tbl) => tbl.id.equals(id)))
-        .write(newCategory.toCompanion());
+        .write(taskCategoriesCompanion);
   }
 
   Future<void> deleteCategory(int id) async {
-    await (delete(taskCategories)
-          ..where((tbl) => tbl.id.equals(id) | tbl.isDeletable.isValue(true)))
-        .go();
     await (delete(taskItems)..where((tbl) => tbl.category.equals(id))).go();
+    await (delete(taskCategories)
+          ..where((tbl) => tbl.id.equals(id) & tbl.isDeletable.isValue(true)))
+        .go();
   }
 
-  Stream<List<CategoryEntity>> watchCategories() {
+  Stream<List<TaskCategory>> watchCategories() {
     return (select(taskCategories)).watch();
   }
 
-  Future<List<CategoryEntity>> getCategories() {
+  Future<List<TaskCategory>> getCategories() {
     return (select(taskCategories)).get();
   }
 
-  Future<void> saveTask(TaskEntity entity) async {
-    await into(taskItems).insertOnConflictUpdate(entity.toCompanion());
+  Future<void> saveTask(TaskItemsCompanion taskItemsCompanion) async {
+    await into(taskItems).insertOnConflictUpdate(taskItemsCompanion);
   }
 
   Future<void> deleleTask(int id) async {
     await (delete(taskItems)..where((tbl) => tbl.id.equals(id))).go();
   }
 
-  Future<void> updateTask(int id, TaskEntity taskEntity) async {
+  Future<void> updateTask(int id, TaskItemsCompanion taskItemsCompanion) async {
     await (update(taskItems)..where((tbl) => tbl.id.equals(id)))
-        .write(taskEntity.toCompanion());
+        .write(taskItemsCompanion);
   }
 
-  Future<List<TaskEntity>> queryTasksByCategory(int categoryId) async {
-    return (select(taskItems)..where((tbl) => tbl.category.equals(categoryId)))
-        .get();
-  }
-
-  Future<TaskEntity?> querySingleTask(int taskId) async {
+  Future<TaskItem?> querySingleTask(int taskId) async {
     return (select(taskItems)..where((tbl) => tbl.id.equals(taskId)))
         .getSingleOrNull();
   }
 
-  Future<List<TaskEntity>> queryTaskByFavorites() async {
+  Future<List<TaskItem>> queryTaskByFavorites() async {
     return (select(taskItems)..where((tbl) => tbl.isFavorite.isValue(true)))
         .get();
   }
 
-  Stream<List<TaskEntity>> queryAllTasks() {
+  Stream<List<TaskItem>> watchAllTasks() {
     return (select(taskItems)).watch();
   }
 

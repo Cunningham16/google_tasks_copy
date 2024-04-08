@@ -1,6 +1,4 @@
 import 'package:google_tasks/data/database/database.dart';
-import 'package:google_tasks/data/entities/category.entity.dart';
-import 'package:google_tasks/data/entities/task.entity.dart';
 
 class TaskRepository {
   TaskRepository({
@@ -11,28 +9,27 @@ class TaskRepository {
 
   Future<void> deleteTask(int id) => _db.deleleTask(id);
 
-  Future<void> saveTask(TaskEntity entity) => _db.saveTask(entity);
+  Future<void> saveTask(TaskItemsCompanion entity) => _db.saveTask(entity);
 
-  Future<void> updateTask(int id, TaskEntity taskEntity) =>
-      _db.updateTask(id, taskEntity);
+  Future<void> updateTask(int id, TaskItemsCompanion taskItem) =>
+      _db.updateTask(id, taskItem);
 
-  Future<List<TaskEntity>> getTasksByCategory(int categoryId) =>
-      _db.queryTasksByCategory(categoryId);
+  Future<TaskItem?> getSingleTask(int taskId) => _db.querySingleTask(taskId);
 
-  Future<TaskEntity?> getSingleTask(int taskId) => _db.querySingleTask(taskId);
+  Future<List<TaskItem>> getTasksByFavorites() => _db.queryTaskByFavorites();
 
-  Future<List<TaskEntity>> getTasksByFavorites() => _db.queryTaskByFavorites();
+  Stream<List<TaskItem>> watchAllTasks() => _db.watchAllTasks();
 
-  Stream<List<TaskEntity>> getAllTasks() => _db.queryAllTasks();
+  Future<void> saveCategory(TaskCategoriesCompanion entity) =>
+      _db.saveCategory(entity);
 
-  Future<void> saveCategory(CategoryEntity entity) => _db.saveCategory(entity);
-
-  Future<void> updateCategory(id, newCategory) =>
-      _db.updateCategory(id, newCategory);
+  Future<void> updateCategory(
+          id, TaskCategoriesCompanion taskCategoriesCompanion) =>
+      _db.updateCategory(id, taskCategoriesCompanion);
 
   Future<void> deleteCategory(int id) => _db.deleteCategory(id);
 
-  Stream<List<CategoryEntity>> watchCategories() => _db.watchCategories();
+  Stream<List<TaskCategory>> watchCategories() => _db.watchCategories();
 
-  Future<List<CategoryEntity>> getCategories() => _db.getCategories();
+  Future<List<TaskCategory>> getCategories() => _db.getCategories();
 }

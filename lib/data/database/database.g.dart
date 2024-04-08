@@ -4,7 +4,7 @@ part of 'database.dart';
 
 // ignore_for_file: type=lint
 class $TaskCategoriesTable extends TaskCategories
-    with TableInfo<$TaskCategoriesTable, CategoryEntity> {
+    with TableInfo<$TaskCategoriesTable, TaskCategory> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -49,7 +49,7 @@ class $TaskCategoriesTable extends TaskCategories
   String get actualTableName => $name;
   static const String $name = 'task_categories';
   @override
-  VerificationContext validateIntegrity(Insertable<CategoryEntity> instance,
+  VerificationContext validateIntegrity(Insertable<TaskCategory> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -78,13 +78,15 @@ class $TaskCategoriesTable extends TaskCategories
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  CategoryEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+  TaskCategory map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CategoryEntity(
+    return TaskCategory(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      isDeletable: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_deletable'])!,
       sortType: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}sort_type'])!,
     );
@@ -96,7 +98,88 @@ class $TaskCategoriesTable extends TaskCategories
   }
 }
 
-class TaskCategoriesCompanion extends UpdateCompanion<CategoryEntity> {
+class TaskCategory extends DataClass implements Insertable<TaskCategory> {
+  final int id;
+  final String name;
+  final bool isDeletable;
+  final int sortType;
+  const TaskCategory(
+      {required this.id,
+      required this.name,
+      required this.isDeletable,
+      required this.sortType});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['is_deletable'] = Variable<bool>(isDeletable);
+    map['sort_type'] = Variable<int>(sortType);
+    return map;
+  }
+
+  TaskCategoriesCompanion toCompanion(bool nullToAbsent) {
+    return TaskCategoriesCompanion(
+      id: Value(id),
+      name: Value(name),
+      isDeletable: Value(isDeletable),
+      sortType: Value(sortType),
+    );
+  }
+
+  factory TaskCategory.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TaskCategory(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      isDeletable: serializer.fromJson<bool>(json['isDeletable']),
+      sortType: serializer.fromJson<int>(json['sortType']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'isDeletable': serializer.toJson<bool>(isDeletable),
+      'sortType': serializer.toJson<int>(sortType),
+    };
+  }
+
+  TaskCategory copyWith(
+          {int? id, String? name, bool? isDeletable, int? sortType}) =>
+      TaskCategory(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        isDeletable: isDeletable ?? this.isDeletable,
+        sortType: sortType ?? this.sortType,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('TaskCategory(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('isDeletable: $isDeletable, ')
+          ..write('sortType: $sortType')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, isDeletable, sortType);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TaskCategory &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.isDeletable == this.isDeletable &&
+          other.sortType == this.sortType);
+}
+
+class TaskCategoriesCompanion extends UpdateCompanion<TaskCategory> {
   final Value<int> id;
   final Value<String> name;
   final Value<bool> isDeletable;
@@ -113,7 +196,7 @@ class TaskCategoriesCompanion extends UpdateCompanion<CategoryEntity> {
     this.isDeletable = const Value.absent(),
     this.sortType = const Value.absent(),
   }) : name = Value(name);
-  static Insertable<CategoryEntity> custom({
+  static Insertable<TaskCategory> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<bool>? isDeletable,
@@ -171,7 +254,7 @@ class TaskCategoriesCompanion extends UpdateCompanion<CategoryEntity> {
 }
 
 class $TaskItemsTable extends TaskItems
-    with TableInfo<$TaskItemsTable, TaskEntity> {
+    with TableInfo<$TaskItemsTable, TaskItem> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -242,7 +325,7 @@ class $TaskItemsTable extends TaskItems
   String get actualTableName => $name;
   static const String $name = 'task_items';
   @override
-  VerificationContext validateIntegrity(Insertable<TaskEntity> instance,
+  VerificationContext validateIntegrity(Insertable<TaskItem> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -299,19 +382,21 @@ class $TaskItemsTable extends TaskItems
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  TaskEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+  TaskItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return TaskEntity(
-      isCompleted: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_completed'])!,
+    return TaskItem(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      isFavorite: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
-      content: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}body'])!,
       title: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      content: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}body'])!,
+      category: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}category_id']),
+      isCompleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_completed'])!,
+      isFavorite: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
       date: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}date'])!,
       time: attachedDatabase.typeMapping
@@ -325,7 +410,136 @@ class $TaskItemsTable extends TaskItems
   }
 }
 
-class TaskItemsCompanion extends UpdateCompanion<TaskEntity> {
+class TaskItem extends DataClass implements Insertable<TaskItem> {
+  final int id;
+  final String title;
+  final String content;
+  final int? category;
+  final bool isCompleted;
+  final bool isFavorite;
+  final String date;
+  final String time;
+  const TaskItem(
+      {required this.id,
+      required this.title,
+      required this.content,
+      this.category,
+      required this.isCompleted,
+      required this.isFavorite,
+      required this.date,
+      required this.time});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['title'] = Variable<String>(title);
+    map['body'] = Variable<String>(content);
+    if (!nullToAbsent || category != null) {
+      map['category_id'] = Variable<int>(category);
+    }
+    map['is_completed'] = Variable<bool>(isCompleted);
+    map['is_favorite'] = Variable<bool>(isFavorite);
+    map['date'] = Variable<String>(date);
+    map['time'] = Variable<String>(time);
+    return map;
+  }
+
+  TaskItemsCompanion toCompanion(bool nullToAbsent) {
+    return TaskItemsCompanion(
+      id: Value(id),
+      title: Value(title),
+      content: Value(content),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
+      isCompleted: Value(isCompleted),
+      isFavorite: Value(isFavorite),
+      date: Value(date),
+      time: Value(time),
+    );
+  }
+
+  factory TaskItem.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TaskItem(
+      id: serializer.fromJson<int>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      content: serializer.fromJson<String>(json['content']),
+      category: serializer.fromJson<int?>(json['category']),
+      isCompleted: serializer.fromJson<bool>(json['isCompleted']),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      date: serializer.fromJson<String>(json['date']),
+      time: serializer.fromJson<String>(json['time']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'title': serializer.toJson<String>(title),
+      'content': serializer.toJson<String>(content),
+      'category': serializer.toJson<int?>(category),
+      'isCompleted': serializer.toJson<bool>(isCompleted),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
+      'date': serializer.toJson<String>(date),
+      'time': serializer.toJson<String>(time),
+    };
+  }
+
+  TaskItem copyWith(
+          {int? id,
+          String? title,
+          String? content,
+          Value<int?> category = const Value.absent(),
+          bool? isCompleted,
+          bool? isFavorite,
+          String? date,
+          String? time}) =>
+      TaskItem(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        content: content ?? this.content,
+        category: category.present ? category.value : this.category,
+        isCompleted: isCompleted ?? this.isCompleted,
+        isFavorite: isFavorite ?? this.isFavorite,
+        date: date ?? this.date,
+        time: time ?? this.time,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('TaskItem(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('content: $content, ')
+          ..write('category: $category, ')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('date: $date, ')
+          ..write('time: $time')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, title, content, category, isCompleted, isFavorite, date, time);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TaskItem &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.content == this.content &&
+          other.category == this.category &&
+          other.isCompleted == this.isCompleted &&
+          other.isFavorite == this.isFavorite &&
+          other.date == this.date &&
+          other.time == this.time);
+}
+
+class TaskItemsCompanion extends UpdateCompanion<TaskItem> {
   final Value<int> id;
   final Value<String> title;
   final Value<String> content;
@@ -359,7 +573,7 @@ class TaskItemsCompanion extends UpdateCompanion<TaskEntity> {
         isFavorite = Value(isFavorite),
         date = Value(date),
         time = Value(time);
-  static Insertable<TaskEntity> custom({
+  static Insertable<TaskItem> custom({
     Expression<int>? id,
     Expression<String>? title,
     Expression<String>? content,
