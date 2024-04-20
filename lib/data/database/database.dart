@@ -22,15 +22,13 @@ class TaskCategories extends Table {
 class TaskItems extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
-  TextColumn get content => text().named('body')();
-  IntColumn get category => integer()
-      .nullable()
-      .named('category_id')
-      .references(TaskCategories, #id)();
-  BoolColumn get isCompleted => boolean().named('is_completed')();
-  BoolColumn get isFavorite => boolean().named('is_favorite')();
-  TextColumn get date => text()();
-  TextColumn get time => text()();
+  TextColumn get content => text().named('body').nullable()();
+  IntColumn get category =>
+      integer().named('category_id').references(TaskCategories, #id)();
+  BoolColumn get isCompleted => boolean()();
+  BoolColumn get isFavorite => boolean()();
+  TextColumn get date => text().nullable()();
+  TextColumn get time => text().nullable()();
 }
 
 @DriftDatabase(tables: [TaskItems, TaskCategories])
@@ -39,7 +37,7 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> saveCategory(
       TaskCategoriesCompanion taskCategoriesCompanion) async {
-    await into(taskCategories).insertOnConflictUpdate(taskCategoriesCompanion);
+    await into(taskCategories).insert(taskCategoriesCompanion);
   }
 
   Future<void> updateCategory(
@@ -59,12 +57,8 @@ class AppDatabase extends _$AppDatabase {
     return (select(taskCategories)).watch();
   }
 
-  Future<List<TaskCategory>> getCategories() {
-    return (select(taskCategories)).get();
-  }
-
   Future<void> saveTask(TaskItemsCompanion taskItemsCompanion) async {
-    await into(taskItems).insertOnConflictUpdate(taskItemsCompanion);
+    await into(taskItems).insert(taskItemsCompanion);
   }
 
   Future<void> deleleTask(int id) async {
