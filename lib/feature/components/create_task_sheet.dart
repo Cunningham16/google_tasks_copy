@@ -2,13 +2,14 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/data/database/database.dart';
-import 'package:google_tasks/domain/shared_pref_repository.dart';
 import 'package:google_tasks/domain/task.repository.dart';
 import 'package:google_tasks/feature/cubit/home_page_cubit.dart';
 import 'package:intl/intl.dart';
 
 class CreateTaskSheet extends StatefulWidget {
-  const CreateTaskSheet({super.key});
+  const CreateTaskSheet({super.key, required this.isFavoriteFlag});
+
+  final bool isFavoriteFlag;
 
   @override
   State<CreateTaskSheet> createState() => _CreateTaskSheetState();
@@ -31,7 +32,6 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
   @override
   void initState() {
     super.initState();
-
     contentFocusNode = FocusNode();
   }
 
@@ -175,7 +175,7 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                       onPressed: () {
                         toggleIsFavorite();
                       },
-                      icon: isFavorite
+                      icon: isFavorite || widget.isFavoriteFlag
                           ? const Icon(Icons.star)
                           : const Icon(Icons.star_border_outlined)),
                   const Spacer(),
@@ -185,10 +185,14 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                           RepositoryProvider.of<TaskRepository>(context)
                               .saveTask(TaskItemsCompanion(
                                   title: Value(title),
-                                  category: Value(state),
+                                  content: Value(content),
+                                  category: Value(
+                                      context.read<CurrentTabCubit>().state),
                                   isCompleted: const Value(false),
                                   isFavorite: Value(isFavorite),
-                                  content: Value(content)));
+                                  date: Value(date),
+                                  time: Value(time),
+                                  position: const Value(-1)));
                           Navigator.of(context).pop();
                         } else {
                           null;

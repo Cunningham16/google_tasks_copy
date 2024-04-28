@@ -19,39 +19,47 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  late TabController tabController;
+
+  void changeCurrentTab(
+      int currentTabIndex, List<TasksWithCategories> categories) {
+    TasksWithCategories currentTab = categories[currentTabIndex];
+    //Сохраняем в локалку
+    SharedPreferencesRepository sharedPreferencesRepository =
+        context.read<SharedPreferencesRepository>();
+    sharedPreferencesRepository.setLastTab(currentTab.taskCategory.id);
+    //сохраняем в кубите
+    context.read<CurrentTabCubit>().changeTab(currentTab.taskCategory.id);
+  }
 
   @override
   void initState() {
-    context.read<CurrentTabCubit>().changeTab(
-        context.read<SharedPreferencesRepository>().getLastTab() as int);
-    _tabController = TabController(length: 2, vsync: this);
     super.initState();
   }
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  void changeCurrentTab(int currentTab) {
-    SharedPreferencesRepository sharedPreferencesRepository =
-        context.read<SharedPreferencesRepository>();
-    sharedPreferencesRepository.setLastTab(currentTab);
-    //сохраняем в кубите
-    context
-        .read<CurrentTabCubit>()
-        .changeTab(sharedPreferencesRepository.getLastTab() as int);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<TaskCategory>>(
-      stream: RepositoryProvider.of<TaskRepository>(context).watchCategories(),
-      builder: (context, snapshotCtg) {
+    return StreamBuilder<List<TasksWithCategories>>(
+      stream: RepositoryProvider.of<TaskRepository>(context)
+          .watchCategoriesWithTasks(),
+      builder: (context, snapshot) {
+        if (snapshot.data!.isNotEmpty) {
+          tabController = TabController(
+              length: snapshot.data!.length,
+              vsync: this,
+              initialIndex: snapshot.data!.indexWhere((element) =>
+                  element.taskCategory.id ==
+                  RepositoryProvider.of<SharedPreferencesRepository>(context)
+                      .getLastTab()));
+          tabController.addListener(() {
+            if (tabController.indexIsChanging ||
+                tabController.index != tabController.previousIndex) {
+              changeCurrentTab(tabController.index, snapshot.data!);
+            }
+          });
+        }
+
         return BlocBuilder<CurrentTabCubit, int>(
           builder: (context, state) => Scaffold(
             body: NestedScrollView(
@@ -63,16 +71,16 @@ class _HomeScreenState extends State<HomeScreen>
                     centerTitle: true,
                     pinned: true,
                     floating: true,
-                    snap: true,
+                    snap: false,
                     forceElevated: innerBoxIsScrolled,
                     title: const Text(
                       "Задачи",
                     ),
                     bottom: TabBar(
+                      controller: tabController,
                       tabAlignment: TabAlignment.start,
-                      onTap: (value) => changeCurrentTab(value),
-                      tabs: List.from(snapshotCtg.data!
-                          .map((e) => CategoryButton(category: e))
+                      tabs: List.from(snapshot.data!
+                          .map((e) => CategoryButton(category: e.taskCategory))
                           .toList())
                         ..add(Tab(
                           child: InkWell(
@@ -100,20 +108,20 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ];
               },
-              body: StreamBuilder(
-                stream: RepositoryProvider.of<TaskRepository>(context)
-                    .watchAllTasks(),
-                builder: (context, snapshotTasks) => TabBarView(
-                  children: snapshotCtg.data!.map((e) {
-                    print(snapshotTasks.data);
-                    return TaskList(
-                        filteredList: snapshotTasks.data
-                            ?.where((element) => element.category == e.id));
-                  }).toList(),
-                ),
+              body: TabBarView(
+                viewportFraction: 1,
+                controller: tabController,
+                children: List.from(snapshot.data!.map((e) {
+                  return TaskList(
+                      sortType: e.taskCategory.sortType,
+                      filteredList: e.taskItems);
+                }).toList())
+                  ..add(Container()),
               ),
             ),
-            bottomNavigationBar: const BottomBar(),
+            bottomNavigationBar: BottomBar(
+              tabController: tabController,
+            ),
             drawerScrimColor: Colors.blue,
           ),
         );

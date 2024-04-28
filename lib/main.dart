@@ -1,9 +1,9 @@
 import 'dart:developer';
 
+//import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/data/database/database.dart';
-import 'package:google_tasks/data/entities/category.entity.dart';
 import 'package:google_tasks/domain/shared_pref_repository.dart';
 import 'package:google_tasks/domain/task.repository.dart';
 import 'package:google_tasks/feature/cubit/home_page_cubit.dart';
@@ -25,13 +25,13 @@ void main() async {
   //очистка на время тестирования
   //TODO: убрать после успешного тестирования
   //await database.deleteTable();
-  //
-  //await database.into(database.taskCategories).insert(
-  //    const CategoryEntity(name: "Избранное", isDeleteable: false)
-  //        .toCompanion());
-  //await database.into(database.taskCategories).insert(
-  //    const CategoryEntity(name: "Мои задачи", isDeleteable: false)
-  //        .toCompanion());
+
+  //await database
+  //    .into(database.taskCategories)
+  //    .insert(const TaskCategoriesCompanion(name: Value("Избранное")));
+  //await database
+  //    .into(database.taskCategories)
+  //    .insert(const TaskCategoriesCompanion(name: Value("Мои задачи")));
 
   FlutterError.onError = (details) {
     log(details.exceptionAsString(), stackTrace: details.stack);

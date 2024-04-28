@@ -9,19 +9,25 @@ class SortSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(10),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
+          const Padding(
             padding: EdgeInsets.all(10),
             child: Text(
               "Сортировка",
               textAlign: TextAlign.left,
             ),
           ),
-          CategoryListButton(title: "В моем порядке", iconInfo: Icons.done),
-          CategoryListButton(title: "По дате", iconInfo: Icons.done),
-          CategoryListButton(title: "Недавно отмеченные", iconInfo: Icons.done)
+          CategoryListButton(
+            title: "В моем порядке",
+            iconInfo: Icons.done,
+            onTap: () {},
+          ),
+          CategoryListButton(
+              title: "По дате", iconInfo: Icons.done, onTap: () {}),
+          CategoryListButton(
+              title: "Недавно отмеченные", iconInfo: Icons.done, onTap: () {})
         ],
       ),
     );

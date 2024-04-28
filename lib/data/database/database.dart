@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:google_tasks/data/entities/category.entity.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:rxdart/rxdart.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 part 'database.g.dart';
@@ -22,18 +23,49 @@ class TaskCategories extends Table {
 class TaskItems extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
-  TextColumn get content => text().named('body').nullable()();
+  TextColumn get content => text().named('body')();
   IntColumn get category =>
       integer().named('category_id').references(TaskCategories, #id)();
   BoolColumn get isCompleted => boolean()();
   BoolColumn get isFavorite => boolean()();
-  TextColumn get date => text().nullable()();
-  TextColumn get time => text().nullable()();
+  TextColumn get date => text()();
+  TextColumn get time => text()();
+  IntColumn get position => integer().withDefault(const Constant(-1))();
+}
+
+class TasksWithCategories {
+  const TasksWithCategories(this.taskCategory, this.taskItems);
+
+  final TaskCategory taskCategory;
+  final List<TaskItem> taskItems;
 }
 
 @DriftDatabase(tables: [TaskItems, TaskCategories])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+
+  //Не думал, что придется добавлять RxDart, но он здорово выручил здесь
+  Stream<List<TasksWithCategories>> queryCategoriesWithTasks() {
+    final categories = select(taskCategories).watch();
+    final tasks = select(taskItems).watch();
+
+    return Rx.combineLatest2(
+        categories,
+        tasks,
+        (categoryList, b) => categoryList.map((category) {
+              List<TaskItem> tasksOfCategory;
+              if (categoryList.indexOf(category) == 0) {
+                tasksOfCategory =
+                    b.where((element) => element.isFavorite == true).toList();
+              } else {
+                tasksOfCategory = b
+                    .where((element) => element.category == category.id)
+                    .toList();
+              }
+
+              return TasksWithCategories(category, tasksOfCategory);
+            }).toList());
+  }
 
   Future<void> saveCategory(
       TaskCategoriesCompanion taskCategoriesCompanion) async {
@@ -61,7 +93,7 @@ class AppDatabase extends _$AppDatabase {
     await into(taskItems).insert(taskItemsCompanion);
   }
 
-  Future<void> deleleTask(int id) async {
+  Future<void> deleteTask(int id) async {
     await (delete(taskItems)..where((tbl) => tbl.id.equals(id))).go();
   }
 

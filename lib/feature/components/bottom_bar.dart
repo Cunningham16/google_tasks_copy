@@ -6,7 +6,10 @@ import 'create_task_sheet.dart';
 import 'more_sheet.dart';
 
 class BottomBar extends StatelessWidget {
-  const BottomBar({super.key});
+  const BottomBar({super.key, required this.tabController});
+
+//TODO: переделать логику таббаров, т.к. есть ощущение, что это антипаттерн
+  final TabController tabController;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +18,11 @@ class BottomBar extends StatelessWidget {
       children: [
         IconButton(
           onPressed: () {
-            _displayBottomSheet(context, const CategoryListSheet());
+            _displayBottomSheet(
+                context,
+                CategoryListSheet(
+                  tabController: tabController,
+                ));
           },
           icon: const Icon(
             Icons.list_alt,
@@ -44,7 +51,8 @@ class BottomBar extends StatelessWidget {
         FloatingActionButton(
           elevation: 0,
           onPressed: () {
-            _displayBottomSheet(context, const CreateTaskSheet());
+            _displayBottomSheet(context,
+                CreateTaskSheet(isFavoriteFlag: tabController.index == 0));
           },
           child: const Icon(Icons.add, size: 25),
         )

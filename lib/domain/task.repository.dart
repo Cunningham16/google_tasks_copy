@@ -7,7 +7,10 @@ class TaskRepository {
 
   final AppDatabase _db;
 
-  Future<void> deleteTask(int id) => _db.deleleTask(id);
+  Stream<List<TasksWithCategories>> watchCategoriesWithTasks() =>
+      _db.queryCategoriesWithTasks();
+
+  Future<void> deleteTask(int id) => _db.deleteTask(id);
 
   Future<void> saveTask(TaskItemsCompanion entity) => _db.saveTask(entity);
 
