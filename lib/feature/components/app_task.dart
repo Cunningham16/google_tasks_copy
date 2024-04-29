@@ -1,8 +1,10 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:google_tasks/data/database/database.dart';
 import 'package:google_tasks/domain/task.repository.dart';
+import 'package:intl/intl.dart';
 
 class AppTask extends StatelessWidget {
   const AppTask({super.key, required this.task});
@@ -12,7 +14,7 @@ class AppTask extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      //onTap: () => context.go("/${RoutesLocation.taskDetails}"),
+      onTap: () {},
       child: Container(
         padding: const EdgeInsets.all(6),
         child: Row(
@@ -24,7 +26,10 @@ class AppTask extends StatelessWidget {
                 RepositoryProvider.of<TaskRepository>(context).updateTask(
                     task.id,
                     task
-                        .copyWith(isCompleted: !task.isCompleted)
+                        .copyWith(
+                            isCompleted: !task.isCompleted,
+                            whenCompleted: Value(
+                                !task.isCompleted ? DateTime.now() : null))
                         .toCompanion(true));
               },
               shape: const CircleBorder(),
@@ -52,19 +57,12 @@ class AppTask extends StatelessWidget {
                 const Gap(5),
                 Row(
                   children: [
-                    if (task.date.isNotEmpty)
+                    if (task.date != null)
                       Chip(
                           label: Text(
-                        task.date,
+                        DateFormat.MMMd().format(task.date!),
                         style: Theme.of(context).textTheme.bodyMedium,
                       )),
-                    const Gap(10),
-                    if (task.time.isNotEmpty)
-                      Chip(
-                          label: Text(
-                        task.time,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ))
                   ],
                 ),
               ],

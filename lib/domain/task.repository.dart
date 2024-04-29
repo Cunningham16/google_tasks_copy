@@ -12,16 +12,15 @@ class TaskRepository {
 
   Future<void> deleteTask(int id) => _db.deleteTask(id);
 
+  Future<void> deleteAllCompletedTasks(int categoryId) =>
+      _db.clearCompletedTasks(categoryId);
+
   Future<void> saveTask(TaskItemsCompanion entity) => _db.saveTask(entity);
 
   Future<void> updateTask(int id, TaskItemsCompanion taskItem) =>
       _db.updateTask(id, taskItem);
 
   Future<TaskItem?> getSingleTask(int taskId) => _db.querySingleTask(taskId);
-
-  Future<List<TaskItem>> getTasksByFavorites() => _db.queryTaskByFavorites();
-
-  Stream<List<TaskItem>> watchAllTasks() => _db.watchAllTasks();
 
   Future<void> saveCategory(TaskCategoriesCompanion entity) =>
       _db.saveCategory(entity);

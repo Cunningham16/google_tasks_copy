@@ -48,10 +48,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           tabController = TabController(
               length: snapshot.data!.length,
               vsync: this,
-              initialIndex: snapshot.data!.indexWhere((element) =>
-                  element.taskCategory.id ==
-                  RepositoryProvider.of<SharedPreferencesRepository>(context)
-                      .getLastTab()));
+              initialIndex: snapshot.data!.isNotEmpty
+                  ? snapshot.data!.indexWhere((element) =>
+                      element.taskCategory.id ==
+                      RepositoryProvider.of<SharedPreferencesRepository>(
+                              context)
+                          .getLastTab())
+                  : 0);
           tabController.addListener(() {
             if (tabController.indexIsChanging ||
                 tabController.index != tabController.previousIndex) {
@@ -59,7 +62,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             }
           });
         }
-
         return BlocBuilder<CurrentTabCubit, int>(
           builder: (context, state) => Scaffold(
             body: NestedScrollView(
@@ -86,9 +88,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: InkWell(
                             onTap: () async {
                               final newCategoryName =
-                                  await Navigator.of(context)
-                                          .push<void>(CreateListScreen.route())
-                                      as String;
+                                  await Navigator.of(context).push<void>(
+                                      CreateListScreen.route("")) as String;
                               if (!context.mounted) return;
                               RepositoryProvider.of<TaskRepository>(context)
                                   .saveCategory(TaskCategoriesCompanion(
@@ -109,7 +110,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ];
               },
               body: TabBarView(
-                viewportFraction: 1,
                 controller: tabController,
                 children: List.from(snapshot.data!.map((e) {
                   return TaskList(
@@ -121,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             bottomNavigationBar: BottomBar(
               tabController: tabController,
+              snapshot: snapshot.data![tabController.index],
             ),
             drawerScrimColor: Colors.blue,
           ),

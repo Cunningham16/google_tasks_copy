@@ -52,7 +52,7 @@ class CategoryListSheet extends StatelessWidget {
                 CategoryListButton(
                   onTap: () async {
                     final newCategoryName = await Navigator.of(context)
-                        .push<void>(CreateListScreen.route()) as String;
+                        .push<void>(CreateListScreen.route("")) as String;
                     if (!context.mounted) return;
                     RepositoryProvider.of<TaskRepository>(context).saveCategory(
                         TaskCategoriesCompanion(

@@ -7,9 +7,11 @@ import 'package:google_tasks/feature/cubit/home_page_cubit.dart';
 import 'package:intl/intl.dart';
 
 class CreateTaskSheet extends StatefulWidget {
-  const CreateTaskSheet({super.key, required this.isFavoriteFlag});
+  const CreateTaskSheet(
+      {super.key, required this.isFavoriteFlag, required this.taskCount});
 
   final bool isFavoriteFlag;
+  final int taskCount;
 
   @override
   State<CreateTaskSheet> createState() => _CreateTaskSheetState();
@@ -23,8 +25,7 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
 
   String title = '';
   String content = '';
-  String date = '';
-  String time = '';
+  DateTime? date;
   bool isFavorite = false;
 
   bool isContentVisible = false;
@@ -108,7 +109,7 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
               ],
               Row(
                 children: [
-                  if (date.isNotEmpty)
+                  if (date != null)
                     Padding(
                         padding: const EdgeInsets.all(10),
                         child: Chip(
@@ -116,25 +117,10 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                             Icons.close,
                             size: 15,
                           ),
-                          label: Text(date),
+                          label: Text(DateFormat.MMMd().format(date!)),
                           onDeleted: () {
                             setState(() {
-                              date = '';
-                            });
-                          },
-                        )),
-                  if (time.isNotEmpty)
-                    Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Chip(
-                          deleteIcon: const Icon(
-                            Icons.close,
-                            size: 15,
-                          ),
-                          label: Text(time),
-                          onDeleted: () {
-                            setState(() {
-                              time = '';
+                              date = null;
                             });
                           },
                         )),
@@ -151,26 +137,17 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                       onPressed: () async {
                         await showDatePicker(
                                 context: context,
-                                firstDate: DateTime(2024),
+                                firstDate: DateTime(DateTime.now().year),
                                 lastDate: DateTime(2030))
                             .then((value) {
                           if (value != null) {
                             setState(() {
-                              date = DateFormat.MMMd().format(value);
+                              date = value;
                             });
                           }
                         });
                       },
                       icon: const Icon(Icons.event)),
-                  IconButton(
-                      onPressed: () async {
-                        await showTimePicker(
-                                context: context, initialTime: TimeOfDay.now())
-                            .then((value) => setState(() {
-                                  time = "${value!.hour}:${value.minute}";
-                                }));
-                      },
-                      icon: const Icon(Icons.schedule)),
                   IconButton(
                       onPressed: () {
                         toggleIsFavorite();
@@ -191,8 +168,7 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                                   isCompleted: const Value(false),
                                   isFavorite: Value(isFavorite),
                                   date: Value(date),
-                                  time: Value(time),
-                                  position: const Value(-1)));
+                                  position: Value(widget.taskCount)));
                           Navigator.of(context).pop();
                         } else {
                           null;

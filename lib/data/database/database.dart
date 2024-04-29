@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:google_tasks/data/entities/category.entity.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
@@ -28,8 +27,9 @@ class TaskItems extends Table {
       integer().named('category_id').references(TaskCategories, #id)();
   BoolColumn get isCompleted => boolean()();
   BoolColumn get isFavorite => boolean()();
-  TextColumn get date => text()();
-  TextColumn get time => text()();
+  DateTimeColumn get date => dateTime().nullable()();
+  DateTimeColumn get whenCompleted =>
+      dateTime().named("when_completed").nullable()();
   IntColumn get position => integer().withDefault(const Constant(-1))();
 }
 
@@ -102,18 +102,16 @@ class AppDatabase extends _$AppDatabase {
         .write(taskItemsCompanion);
   }
 
+  Future<void> clearCompletedTasks(int categoryId) async {
+    await (delete(taskItems)
+          ..where((tbl) =>
+              tbl.category.equals(categoryId) & tbl.isCompleted.isValue(true)))
+        .go();
+  }
+
   Future<TaskItem?> querySingleTask(int taskId) async {
     return (select(taskItems)..where((tbl) => tbl.id.equals(taskId)))
         .getSingleOrNull();
-  }
-
-  Future<List<TaskItem>> queryTaskByFavorites() async {
-    return (select(taskItems)..where((tbl) => tbl.isFavorite.isValue(true)))
-        .get();
-  }
-
-  Stream<List<TaskItem>> watchAllTasks() {
-    return (select(taskItems)).watch();
   }
 
   Future<void> deleteTable() async {
@@ -128,12 +126,10 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration {
     return MigrationStrategy(onCreate: (Migrator m) async {
       await m.createAll();
-      await into(taskCategories).insert(
-          const CategoryEntity(name: "Избранное", isDeleteable: false)
-              .toCompanion());
-      await into(taskCategories).insert(
-          const CategoryEntity(name: "Мои задачи", isDeleteable: false)
-              .toCompanion());
+      await into(taskCategories).insert(TaskCategoriesCompanion.insert(
+          name: "Избранное", isDeletable: const Value(false)));
+      await into(taskCategories).insert(TaskCategoriesCompanion.insert(
+          name: "Мои задачи", isDeletable: const Value(false)));
     });
   }
 

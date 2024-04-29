@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
 class CreateListScreen extends StatefulWidget {
-  const CreateListScreen({super.key});
+  const CreateListScreen({super.key, this.name});
 
-  static Route<void> route() {
+  final String? name;
+
+  static Route<void> route(String? name) {
     return MaterialPageRoute<void>(
-      builder: (_) => const CreateListScreen(),
+      builder: (_) => CreateListScreen(
+        name: name,
+      ),
     );
   }
 
@@ -16,6 +20,17 @@ class CreateListScreen extends StatefulWidget {
 class _CreateListState extends State<CreateListScreen> {
   final controller = TextEditingController();
   String text = '';
+
+  @override
+  void initState() {
+    if (widget.name != null) {
+      setState(() {
+        text = widget.name as String;
+      });
+      controller.text = widget.name as String;
+    }
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -37,7 +52,21 @@ class _CreateListState extends State<CreateListScreen> {
             icon: const Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text("Создание списка"),
+          title: widget.name != ""
+              ? Text(
+                  "Переименование списка",
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.copyWith(fontWeight: FontWeight.w400),
+                )
+              : Text(
+                  "Создание списка",
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.copyWith(fontWeight: FontWeight.w400),
+                ),
           actions: [
             TextButton(
                 onPressed: text.isNotEmpty
