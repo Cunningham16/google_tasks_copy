@@ -2,15 +2,19 @@ import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+
 import 'package:google_tasks/data/database/database.dart';
 import 'package:google_tasks/domain/shared_pref_repository.dart';
 import 'package:google_tasks/domain/task.repository.dart';
+import 'package:google_tasks/feature/components/task_date_lists.dart';
+import 'package:google_tasks/feature/components/task_marked_list.dart';
+import 'package:google_tasks/feature/components/task_normal_list.dart';
 import 'package:google_tasks/feature/cubit/home_page_cubit.dart';
 import 'package:google_tasks/feature/screens/create_list.dart';
+import 'package:google_tasks/feature/shared/sort_types.dart';
 
 import '../components/bottom_bar.dart';
 import '../components/category_button.dart';
-import '../components/task_list.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -31,11 +35,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     sharedPreferencesRepository.setLastTab(currentTab.taskCategory.id);
     //сохраняем в кубите
     context.read<CurrentTabCubit>().changeTab(currentTab.taskCategory.id);
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override
@@ -112,11 +111,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               body: TabBarView(
                 controller: tabController,
                 children: List.from(snapshot.data!.map((e) {
-                  return TaskList(
-                      sortType: e.taskCategory.sortType,
-                      filteredList: e.taskItems);
-                }).toList())
-                  ..add(Container()),
+                  if (e.taskCategory.sortType == SortTypes.byOwn) {
+                    return TaskNormalList(taskItems: e.taskItems);
+                  } else if (e.taskCategory.sortType == SortTypes.byDate) {
+                    return TaskDateList(taskItems: e.taskItems);
+                  } else if (e.taskCategory.sortType == SortTypes.byMarked) {
+                    return TaskMarkedList(taskItems: e.taskItems);
+                  }
+                }).toList()),
               ),
             ),
             bottomNavigationBar: BottomBar(

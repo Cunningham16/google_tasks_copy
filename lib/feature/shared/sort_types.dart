@@ -1,1 +1,1 @@
-enum SortTypes { free, date, byCompeted }
+enum SortTypes { byOwn, byDate, byMarked }

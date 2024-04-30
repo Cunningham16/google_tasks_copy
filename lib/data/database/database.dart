@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:google_tasks/feature/shared/sort_types.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
@@ -15,7 +16,7 @@ class TaskCategories extends Table {
   TextColumn get name => text()();
   BoolColumn get isDeletable =>
       boolean().named('is_deletable').withDefault(const Constant(true))();
-  IntColumn get sortType => integer().withDefault(const Constant(0))();
+  IntColumn get sortType => intEnum<SortTypes>()();
 }
 
 @DataClassName("TaskItem")
@@ -28,8 +29,7 @@ class TaskItems extends Table {
   BoolColumn get isCompleted => boolean()();
   BoolColumn get isFavorite => boolean()();
   DateTimeColumn get date => dateTime().nullable()();
-  DateTimeColumn get whenCompleted =>
-      dateTime().named("when_completed").nullable()();
+  DateTimeColumn get whenMarked => dateTime().named("when_marked").nullable()();
   IntColumn get position => integer().withDefault(const Constant(-1))();
 }
 
@@ -127,9 +127,13 @@ class AppDatabase extends _$AppDatabase {
     return MigrationStrategy(onCreate: (Migrator m) async {
       await m.createAll();
       await into(taskCategories).insert(TaskCategoriesCompanion.insert(
-          name: "Избранное", isDeletable: const Value(false)));
+          sortType: SortTypes.byMarked,
+          name: "Избранное",
+          isDeletable: const Value(false)));
       await into(taskCategories).insert(TaskCategoriesCompanion.insert(
-          name: "Мои задачи", isDeletable: const Value(false)));
+          name: "Мои задачи",
+          isDeletable: const Value(false),
+          sortType: SortTypes.byOwn));
     });
   }
 

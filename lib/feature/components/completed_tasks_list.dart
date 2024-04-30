@@ -25,8 +25,10 @@ class _CompletedTasksListState extends State<CompletedTasksList> {
         ),
         title: const Text("Выполненные"),
         children: widget.taskItems
-            .map((task) =>
-                Material(color: Colors.transparent, child: AppTask(task: task)))
+            .map((task) => AppTask(
+                  task: task,
+                  hideChip: true,
+                ))
             .toList());
   }
 }

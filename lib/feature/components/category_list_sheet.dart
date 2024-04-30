@@ -28,7 +28,9 @@ class CategoryListSheet extends StatelessWidget {
                     Navigator.of(context).pop();
                   },
                   title: "Избранные",
-                  iconInfo: tabController.index == 0 ? Icons.done : Icons.star,
+                  iconInfo: tabController.index == 0
+                      ? Icons.star
+                      : Icons.star_border_outlined,
                 ),
                 const Divider(),
                 ListView.builder(

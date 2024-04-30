@@ -10,7 +10,7 @@ class BottomBar extends StatelessWidget {
   const BottomBar(
       {super.key, required this.tabController, required this.snapshot});
 
-//TODO: переделать логику таббаров, т.к. есть ощущение, что это антипаттерн
+  //TODO: переделать логику таббаров, т.к. есть ощущение, что это антипаттерн
   final TabController tabController;
   final TasksWithCategories snapshot;
 
@@ -34,7 +34,11 @@ class BottomBar extends StatelessWidget {
         ),
         IconButton(
           onPressed: () {
-            _displayBottomSheet(context, const SortSheet());
+            _displayBottomSheet(
+                context,
+                SortSheet(
+                    category: snapshot.taskCategory,
+                    tabController: tabController));
           },
           icon: const Icon(
             Icons.swap_vert,

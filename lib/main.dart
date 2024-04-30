@@ -15,9 +15,11 @@ void main() async {
   AppDatabase database = AppDatabase();
   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
-  List<TaskCategory> firstCategory =
-      await database.select(database.taskCategories).get();
-  sharedPreferences.setInt("currentTab", firstCategory[0].id);
+  if (sharedPreferences.getInt("currentTab") == null) {
+    List<TaskCategory> firstCategory =
+        await database.select(database.taskCategories).get();
+    sharedPreferences.setInt("currentTab", firstCategory[0].id);
+  }
 
   Bloc.observer = SimpleBlocObserver();
 
