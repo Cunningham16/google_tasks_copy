@@ -67,6 +67,11 @@ class AppDatabase extends _$AppDatabase {
             }).toList());
   }
 
+  Future<TaskCategory> getCategoryById(int id) async {
+    return (select(taskCategories)..where((tbl) => tbl.id.equals(id)))
+        .getSingle();
+  }
+
   Future<void> saveCategory(
       TaskCategoriesCompanion taskCategoriesCompanion) async {
     await into(taskCategories).insert(taskCategoriesCompanion);
@@ -109,9 +114,9 @@ class AppDatabase extends _$AppDatabase {
         .go();
   }
 
-  Future<TaskItem?> querySingleTask(int taskId) async {
+  Stream<TaskItem> watchSingleTask(int taskId) {
     return (select(taskItems)..where((tbl) => tbl.id.equals(taskId)))
-        .getSingleOrNull();
+        .watchSingle();
   }
 
   Future<void> deleteTable() async {

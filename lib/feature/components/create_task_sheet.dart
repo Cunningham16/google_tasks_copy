@@ -158,7 +158,7 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                   const Spacer(),
                   TextButton(
                       onPressed: () {
-                        if (title.isNotEmpty) {
+                        if (title != "") {
                           RepositoryProvider.of<TaskRepository>(context)
                               .saveTask(TaskItemsCompanion(
                                   title: Value(title),

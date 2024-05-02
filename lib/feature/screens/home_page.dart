@@ -92,7 +92,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               if (!context.mounted) return;
                               RepositoryProvider.of<TaskRepository>(context)
                                   .saveCategory(TaskCategoriesCompanion(
-                                      name: Value(newCategoryName)));
+                                      name: Value(newCategoryName),
+                                      sortType: const Value(SortTypes.byOwn)));
                             },
                             child: const Row(
                               children: [

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:google_tasks/data/database/database.dart';
 import 'package:google_tasks/domain/task.repository.dart';
+import 'package:google_tasks/feature/screens/task_details.dart';
 import 'package:intl/intl.dart';
 
 class AppTask extends StatelessWidget {
@@ -18,7 +19,9 @@ class AppTask extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         //TODO: Добавить экран подробностей
-        onTap: () {},
+        onTap: () {
+          Navigator.of(context).push(TaskDetails.route(task.id));
+        },
         child: Container(
           padding: const EdgeInsets.all(6),
           child: Row(

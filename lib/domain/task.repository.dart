@@ -20,7 +20,7 @@ class TaskRepository {
   Future<void> updateTask(int id, TaskItemsCompanion taskItem) =>
       _db.updateTask(id, taskItem);
 
-  Future<TaskItem?> getSingleTask(int taskId) => _db.querySingleTask(taskId);
+  Stream<TaskItem> watchSingleTask(int taskId) => _db.watchSingleTask(taskId);
 
   Future<void> saveCategory(TaskCategoriesCompanion entity) =>
       _db.saveCategory(entity);
@@ -32,4 +32,6 @@ class TaskRepository {
   Future<void> deleteCategory(int id) => _db.deleteCategory(id);
 
   Stream<List<TaskCategory>> watchCategories() => _db.watchCategories();
+
+  Future<TaskCategory> getCategoryById(int id) => _db.getCategoryById(id);
 }
