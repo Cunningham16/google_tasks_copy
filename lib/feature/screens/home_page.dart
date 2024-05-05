@@ -1,11 +1,13 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
 import 'package:google_tasks/data/database/database.dart';
 import 'package:google_tasks/domain/shared_pref_repository.dart';
-import 'package:google_tasks/domain/task.repository.dart';
+import 'package:google_tasks/feature/category_bloc/category_bloc.dart';
+import 'package:google_tasks/feature/task_bloc/tasks_bloc.dart';
 import 'package:google_tasks/feature/components/task_date_lists.dart';
 import 'package:google_tasks/feature/components/task_marked_list.dart';
 import 'package:google_tasks/feature/components/task_normal_list.dart';
@@ -26,30 +28,118 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TabController tabController;
 
-  void changeCurrentTab(
-      int currentTabIndex, List<TasksWithCategories> categories) {
-    TasksWithCategories currentTab = categories[currentTabIndex];
-    //Сохраняем в локалку
+  void changeCurrentTab(int currentTabIndex, List<TaskCategory> categories) {
+    TaskCategory currentTab = categories[currentTabIndex];
     SharedPreferencesRepository sharedPreferencesRepository =
         context.read<SharedPreferencesRepository>();
-    sharedPreferencesRepository.setLastTab(currentTab.taskCategory.id);
-    //сохраняем в кубите
-    context.read<CurrentTabCubit>().changeTab(currentTab.taskCategory.id);
+    sharedPreferencesRepository.setLastTab(currentTab.id);
+    context.read<CurrentTabCubit>().changeTab(currentTab.id);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<TasksWithCategories>>(
-      stream: RepositoryProvider.of<TaskRepository>(context)
-          .watchCategoriesWithTasks(),
-      builder: (context, snapshot) {
-        if (snapshot.data!.isNotEmpty) {
+  Widget build(BuildContext context) => MultiBlocListener(
+        listeners: [
+          BlocListener<TaskBloc, TaskState>(
+              listenWhen: (previous, current) =>
+                  previous.lastCompletedTask != current.lastCompletedTask &&
+                  current.lastCompletedTask != null,
+              listener: (context, state) {
+                ScaffoldMessenger.of(context)
+                  ..clearSnackBars()
+                  ..showSnackBar(SnackBar(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0)),
+                    behavior: SnackBarBehavior.floating,
+                    content: state.lastCompletedTask!.isCompleted
+                        ? const Text(
+                            "Задача отмечена как невыполненная",
+                          )
+                        : const Text("Задача выполнена"),
+                    action: SnackBarAction(
+                        label: "Отменить",
+                        onPressed: () {
+                          context.read<TaskBloc>().add(
+                              TaskUndoChanged(state.lastCompletedTask!.id));
+                          context.read<TaskBloc>().add(const TaskLastDumped());
+                        }),
+                  )).closed.then((value) =>
+                      context.read<TaskBloc>().add(const TaskLastDumped()));
+              }),
+          BlocListener<TaskBloc, TaskState>(
+            listenWhen: (previous, current) =>
+                previous.lastDeletedTask != current.lastDeletedTask,
+            listener: (context, state) {
+              ScaffoldMessenger.of(context)
+                ..clearSnackBars()
+                ..showSnackBar(SnackBar(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
+                  behavior: SnackBarBehavior.floating,
+                  content: const Text("Задача удалена"),
+                  action: SnackBarAction(
+                      label: "Отменить",
+                      onPressed: () {
+                        context.read<TaskBloc>().add(TaskCreated(
+                            state.lastDeletedTask!.toCompanion(true)));
+                        context.read<TaskBloc>().add(const TaskLastDumped());
+                      }),
+                )).closed.then((value) =>
+                    context.read<TaskBloc>().add(const TaskLastDumped()));
+            },
+          ),
+          BlocListener<TaskBloc, TaskState>(
+            listenWhen: (previous, current) {
+              return previous.lastUpdatedCategoryTask !=
+                      current.lastUpdatedCategoryTask &&
+                  current.lastUpdatedCategoryTask != null;
+            },
+            listener: (context, state) {
+              final String newCategoryName = context
+                  .read<CategoryBloc>()
+                  .state
+                  .categoryList
+                  .firstWhere((element) =>
+                      element.id ==
+                      state.taskList
+                          .firstWhere((element) =>
+                              element.id == state.lastUpdatedCategoryTask!.id)
+                          .category)
+                  .name;
+              ScaffoldMessenger.of(context)
+                ..clearSnackBars()
+                ..showSnackBar(SnackBar(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
+                  behavior: SnackBarBehavior.floating,
+                  content:
+                      Text('Задача перемещена в список "$newCategoryName"'),
+                  action: SnackBarAction(
+                      label: "Отменить",
+                      onPressed: () {
+                        context
+                            .read<TaskBloc>()
+                            .add(const TaskUpdatedCategoryUndo());
+                        context
+                            .read<TaskBloc>()
+                            .add(const TaskUpdatedCategoryDump());
+                      }),
+                )).closed.then((value) => context
+                    .read<TaskBloc>()
+                    .add(const TaskUpdatedCategoryDump()));
+            },
+          )
+        ],
+        child:
+            BlocBuilder<CategoryBloc, CategoryState>(builder: (context, state) {
+          if (state.categoryList.isEmpty) {
+            return const Center(child: CupertinoActivityIndicator());
+          }
           tabController = TabController(
-              length: snapshot.data!.length,
+              length: state.categoryList.length,
               vsync: this,
-              initialIndex: snapshot.data!.isNotEmpty
-                  ? snapshot.data!.indexWhere((element) =>
-                      element.taskCategory.id ==
+              initialIndex: state.categoryList.isNotEmpty
+                  ? state.categoryList.indexWhere((element) =>
+                      element.id ==
                       RepositoryProvider.of<SharedPreferencesRepository>(
                               context)
                           .getLastTab())
@@ -57,12 +147,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           tabController.addListener(() {
             if (tabController.indexIsChanging ||
                 tabController.index != tabController.previousIndex) {
-              changeCurrentTab(tabController.index, snapshot.data!);
+              changeCurrentTab(tabController.index, state.categoryList);
             }
           });
-        }
-        return BlocBuilder<CurrentTabCubit, int>(
-          builder: (context, state) => Scaffold(
+          return Scaffold(
             body: NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) {
                 return [
@@ -80,8 +168,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     bottom: TabBar(
                       controller: tabController,
                       tabAlignment: TabAlignment.start,
-                      tabs: List.from(snapshot.data!
-                          .map((e) => CategoryButton(category: e.taskCategory))
+                      tabs: List.from(state.categoryList
+                          .map((e) => CategoryButton(category: e))
                           .toList())
                         ..add(Tab(
                           child: InkWell(
@@ -90,10 +178,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   await Navigator.of(context).push<void>(
                                       CreateListScreen.route("")) as String;
                               if (!context.mounted) return;
-                              RepositoryProvider.of<TaskRepository>(context)
-                                  .saveCategory(TaskCategoriesCompanion(
+                              context.read<CategoryBloc>().add(CategoryCreated(
+                                  TaskCategoriesCompanion(
                                       name: Value(newCategoryName),
-                                      sortType: const Value(SortTypes.byOwn)));
+                                      sortType: const Value(SortTypes.byOwn))));
                             },
                             child: const Row(
                               children: [
@@ -109,27 +197,44 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ];
               },
-              body: TabBarView(
-                controller: tabController,
-                children: List.from(snapshot.data!.map((e) {
-                  if (e.taskCategory.sortType == SortTypes.byOwn) {
-                    return TaskNormalList(taskItems: e.taskItems);
-                  } else if (e.taskCategory.sortType == SortTypes.byDate) {
-                    return TaskDateList(taskItems: e.taskItems);
-                  } else if (e.taskCategory.sortType == SortTypes.byMarked) {
-                    return TaskMarkedList(taskItems: e.taskItems);
-                  }
-                }).toList()),
+              body: BlocBuilder<TaskBloc, TaskState>(
+                builder: (context, taskState) {
+                  return TabBarView(
+                    controller: tabController,
+                    children: List.from(state.categoryList.map((e) {
+                      if (e.sortType == SortTypes.byOwn) {
+                        return TaskNormalList(
+                            taskItems: taskState.taskList
+                                .where((element) => element.category == e.id));
+                      } else if (e.sortType == SortTypes.byDate) {
+                        if (e.id == 1) {
+                          return TaskDateList(
+                              taskItems: taskState.taskList
+                                  .where((element) => element.isFavorite));
+                        }
+                        return TaskDateList(
+                            taskItems: taskState.taskList
+                                .where((element) => element.category == e.id));
+                      } else if (e.sortType == SortTypes.byMarked) {
+                        if (e.id == 1) {
+                          return TaskMarkedList(
+                              taskItems: taskState.taskList
+                                  .where((element) => element.isFavorite));
+                        }
+                        return TaskMarkedList(
+                            taskItems: taskState.taskList
+                                .where((element) => element.category == e.id));
+                      }
+                    }).toList()),
+                  );
+                },
               ),
             ),
             bottomNavigationBar: BottomBar(
               tabController: tabController,
-              snapshot: snapshot.data![tabController.index],
             ),
             drawerScrimColor: Colors.blue,
-          ),
-        );
-      },
-    );
-  }
+          );
+        }),
+      );
 }

@@ -2,7 +2,9 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/data/database/database.dart';
-import 'package:google_tasks/domain/task.repository.dart';
+import 'package:google_tasks/feature/category_bloc/category_bloc.dart';
+import 'package:google_tasks/feature/components/select_category_sheet.dart';
+import 'package:google_tasks/feature/task_bloc/tasks_bloc.dart';
 import 'package:google_tasks/feature/cubit/home_page_cubit.dart';
 import 'package:intl/intl.dart';
 
@@ -25,8 +27,9 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
 
   String title = '';
   String content = '';
-  DateTime? date;
+  DateTime date = DateTime(1);
   bool isFavorite = false;
+  int category = 2;
 
   bool isContentVisible = false;
 
@@ -85,9 +88,44 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (widget.isFavoriteFlag)
+                InkWell(
+                  onTap: () async {
+                    final int? selectedCategory = await _displayBottomSheet(
+                        context,
+                        SelectCategorySheet(
+                          currentCategory: category,
+                        ));
+                    if (selectedCategory != null) {
+                      setState(() {
+                        category = selectedCategory;
+                      });
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 15, right: 15, top: 5, bottom: 5),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(context
+                            .read<CategoryBloc>()
+                            .state
+                            .categoryList
+                            .firstWhere((element) => element.id == category)
+                            .name),
+                        const Icon(Icons.arrow_drop_down, size: 20)
+                      ],
+                    ),
+                  ),
+                ),
               TextField(
                 controller: controllerTitle,
-                onChanged: (text) => setTextTitle(text),
+                onChanged: (text) {
+                  String correctedText = text.trim();
+                  setTextTitle(correctedText);
+                },
                 autofocus: true,
                 decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(15),
@@ -98,7 +136,7 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
               if (isContentVisible) ...[
                 TextField(
                   controller: controllerContent,
-                  onChanged: (text) => setTextContent(text),
+                  onChanged: (text) => setTextContent(text.trim()),
                   focusNode: contentFocusNode,
                   decoration: const InputDecoration(
                       contentPadding: EdgeInsets.only(left: 15, right: 15),
@@ -109,7 +147,7 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
               ],
               Row(
                 children: [
-                  if (date != null)
+                  if (date != DateTime(1))
                     Padding(
                         padding: const EdgeInsets.all(10),
                         child: Chip(
@@ -117,10 +155,10 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                             Icons.close,
                             size: 15,
                           ),
-                          label: Text(DateFormat.MMMd().format(date!)),
+                          label: Text(DateFormat.MMMd().format(date)),
                           onDeleted: () {
                             setState(() {
-                              date = null;
+                              date = DateTime(1);
                             });
                           },
                         )),
@@ -157,23 +195,29 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                           : const Icon(Icons.star_border_outlined)),
                   const Spacer(),
                   TextButton(
-                      onPressed: () {
-                        if (title != "") {
-                          RepositoryProvider.of<TaskRepository>(context)
-                              .saveTask(TaskItemsCompanion(
-                                  title: Value(title),
-                                  content: Value(content),
-                                  category: Value(
-                                      context.read<CurrentTabCubit>().state),
-                                  isCompleted: const Value(false),
-                                  isFavorite: Value(isFavorite),
-                                  date: Value(date),
-                                  position: Value(widget.taskCount)));
-                          Navigator.of(context).pop();
-                        } else {
-                          null;
-                        }
-                      },
+                      onPressed: title != ""
+                          ? () {
+                              context.read<TaskBloc>().add(TaskCreated(
+                                  TaskItemsCompanion(
+                                      title: Value(title),
+                                      content: Value(content),
+                                      category: Value(widget.isFavoriteFlag
+                                          ? category
+                                          : context
+                                              .read<CurrentTabCubit>()
+                                              .state),
+                                      isCompleted: const Value(false),
+                                      isFavorite: Value(widget.isFavoriteFlag
+                                          ? true
+                                          : isFavorite),
+                                      date: Value(date),
+                                      whenMarked: Value(widget.isFavoriteFlag
+                                          ? DateTime.now()
+                                          : DateTime(1)),
+                                      position: Value(widget.taskCount))));
+                              Navigator.of(context).pop();
+                            }
+                          : null,
                       child: const Text("Сохранить"))
                 ],
               )
@@ -183,4 +227,13 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
       },
     );
   }
+}
+
+Future _displayBottomSheet(BuildContext context, Widget child) {
+  return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Wrap(children: [child]);
+      });
 }

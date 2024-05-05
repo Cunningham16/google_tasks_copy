@@ -2,8 +2,10 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/data/database/database.dart';
-import 'package:google_tasks/domain/task.repository.dart';
+import 'package:google_tasks/domain/task_repository.dart';
+import 'package:google_tasks/feature/category_bloc/category_bloc.dart';
 import 'package:google_tasks/feature/screens/create_list.dart';
+import 'package:google_tasks/feature/shared/sort_types.dart';
 
 import 'category_list_button.dart';
 
@@ -56,9 +58,10 @@ class CategoryListSheet extends StatelessWidget {
                     final newCategoryName = await Navigator.of(context)
                         .push<void>(CreateListScreen.route("")) as String;
                     if (!context.mounted) return;
-                    RepositoryProvider.of<TaskRepository>(context).saveCategory(
+                    context.read<CategoryBloc>().add(CategoryCreated(
                         TaskCategoriesCompanion(
-                            name: drift.Value(newCategoryName)));
+                            name: drift.Value(newCategoryName),
+                            sortType: const drift.Value(SortTypes.byOwn))));
                     Navigator.of(context).pop();
                   },
                   title: "Создать список",

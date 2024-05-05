@@ -5,43 +5,48 @@ import 'package:intl/intl.dart';
 
 import 'app_task.dart';
 
-class TaskDateList extends StatelessWidget {
+class TaskDateList extends StatefulWidget {
   const TaskDateList({super.key, required this.taskItems});
 
   final Iterable<TaskItem> taskItems;
 
   @override
+  State<TaskDateList> createState() => _TaskDateListState();
+}
+
+class _TaskDateListState extends State<TaskDateList> {
+  @override
   Widget build(BuildContext context) {
     Iterable<TaskItem> uncompleted =
-        taskItems.where((element) => element.isCompleted == false);
+        widget.taskItems.where((element) => element.isCompleted == false);
     Iterable<TaskItem> completed =
-        taskItems.where((element) => element.isCompleted == true);
+        widget.taskItems.where((element) => element.isCompleted == true);
     var sort = uncompleted.toList();
     sort.sort((a, b) {
-      if (a.date == null) {
+      if (a.date == DateTime(1)) {
         return 1;
       }
-      if (b.date == null) {
+      if (b.date == DateTime(1)) {
         return 1;
       }
-      return a.date!.compareTo(b.date!);
+      return a.date.compareTo(b.date);
     });
     var list = sort.toList().map((element) => element.date).toList();
     Map<String, List<TaskItem>> map = {};
     for (int i = 0; i < list.length; i++) {
-      if (list[i] == null) {
+      if (list[i] == DateTime(1)) {
         map["Без даты"] =
-            sort.where((element) => element.date == null).toList();
+            sort.where((element) => element.date == DateTime(1)).toList();
       } else {
-        map[DateFormat.MMMd().format(list[i] as DateTime)] = sort
+        map[DateFormat.MMMd().format(list[i])] = sort
             .where((element) =>
-                element.date != null &&
-                DateFormat.MMMd().format(element.date as DateTime) ==
-                    DateFormat.MMMd().format(list[i] as DateTime))
+                element.date != DateTime(1) &&
+                DateFormat.MMMd().format(element.date) ==
+                    DateFormat.MMMd().format(list[i]))
             .toList();
       }
     }
-    return taskItems.isEmpty
+    return widget.taskItems.isEmpty
         ? const Center(child: Text('No tasks yet'))
         : MediaQuery.removePadding(
             context: context,

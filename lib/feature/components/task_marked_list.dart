@@ -5,20 +5,26 @@ import 'package:intl/intl.dart';
 
 import 'app_task.dart';
 
-class TaskMarkedList extends StatelessWidget {
+class TaskMarkedList extends StatefulWidget {
   const TaskMarkedList({super.key, required this.taskItems});
 
   final Iterable<TaskItem> taskItems;
 
   @override
+  State<TaskMarkedList> createState() => _TaskMarkedListState();
+}
+
+class _TaskMarkedListState extends State<TaskMarkedList> {
+  @override
   Widget build(BuildContext context) {
     Iterable<TaskItem> uncompleted =
-        taskItems.where((element) => element.isCompleted == false);
+        widget.taskItems.where((element) => element.isCompleted == false);
     Iterable<TaskItem> completed =
-        taskItems.where((element) => element.isCompleted == true);
+        widget.taskItems.where((element) => element.isCompleted == true);
+
     final Map<String, List<TaskItem>> sortedTaskList =
-        createMarkedMap(taskItems.toList());
-    return taskItems.isEmpty
+        createMarkedMap(uncompleted.toList());
+    return widget.taskItems.isEmpty
         ? const Center(child: Text('No tasks yet'))
         : MediaQuery.removePadding(
             context: context,
@@ -78,18 +84,18 @@ Map<String, List<TaskItem>> createMarkedMap(List<TaskItem> taskItems) {
   //TODO: Когда-нибудь переделай это говно
   map["Давно отмеченные"] = taskItems
       .where((element) =>
-          element.whenMarked != null &&
-          DateFormat.MMMd().format(element.whenMarked!) !=
+          element.whenMarked != DateTime(1) &&
+          DateFormat.MMMd().format(element.whenMarked) !=
               DateFormat.MMMd().format(DateTime.now()))
       .toList();
   map["Недавно отмеченные"] = taskItems
       .where((element) =>
-          element.whenMarked != null &&
-          DateFormat.MMMd().format(element.whenMarked!) ==
+          element.whenMarked != DateTime(1) &&
+          DateFormat.MMMd().format(element.whenMarked) ==
               DateFormat.MMMd().format(DateTime.now()))
       .toList();
   map["Без пометки"] =
-      taskItems.where((element) => element.whenMarked == null).toList();
+      taskItems.where((element) => element.whenMarked == DateTime(1)).toList();
   map.removeWhere((key, value) => value.isEmpty);
   return map;
 }

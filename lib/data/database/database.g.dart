@@ -316,14 +316,18 @@ class $TaskItemsTable extends TaskItems
   static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
   late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
-      'date', aliasedName, true,
-      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+      'date', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: Constant(DateTime(1)));
   static const VerificationMeta _whenMarkedMeta =
       const VerificationMeta('whenMarked');
   @override
   late final GeneratedColumn<DateTime> whenMarked = GeneratedColumn<DateTime>(
-      'when_marked', aliasedName, true,
-      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+      'when_marked', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: Constant(DateTime(1)));
   static const VerificationMeta _positionMeta =
       const VerificationMeta('position');
   @override
@@ -427,9 +431,9 @@ class $TaskItemsTable extends TaskItems
       isFavorite: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
       date: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}date']),
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
       whenMarked: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}when_marked']),
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}when_marked'])!,
       position: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}position'])!,
     );
@@ -448,8 +452,8 @@ class TaskItem extends DataClass implements Insertable<TaskItem> {
   final int category;
   final bool isCompleted;
   final bool isFavorite;
-  final DateTime? date;
-  final DateTime? whenMarked;
+  final DateTime date;
+  final DateTime whenMarked;
   final int position;
   const TaskItem(
       {required this.id,
@@ -458,8 +462,8 @@ class TaskItem extends DataClass implements Insertable<TaskItem> {
       required this.category,
       required this.isCompleted,
       required this.isFavorite,
-      this.date,
-      this.whenMarked,
+      required this.date,
+      required this.whenMarked,
       required this.position});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -470,12 +474,8 @@ class TaskItem extends DataClass implements Insertable<TaskItem> {
     map['category_id'] = Variable<int>(category);
     map['is_completed'] = Variable<bool>(isCompleted);
     map['is_favorite'] = Variable<bool>(isFavorite);
-    if (!nullToAbsent || date != null) {
-      map['date'] = Variable<DateTime>(date);
-    }
-    if (!nullToAbsent || whenMarked != null) {
-      map['when_marked'] = Variable<DateTime>(whenMarked);
-    }
+    map['date'] = Variable<DateTime>(date);
+    map['when_marked'] = Variable<DateTime>(whenMarked);
     map['position'] = Variable<int>(position);
     return map;
   }
@@ -488,10 +488,8 @@ class TaskItem extends DataClass implements Insertable<TaskItem> {
       category: Value(category),
       isCompleted: Value(isCompleted),
       isFavorite: Value(isFavorite),
-      date: date == null && nullToAbsent ? const Value.absent() : Value(date),
-      whenMarked: whenMarked == null && nullToAbsent
-          ? const Value.absent()
-          : Value(whenMarked),
+      date: Value(date),
+      whenMarked: Value(whenMarked),
       position: Value(position),
     );
   }
@@ -506,8 +504,8 @@ class TaskItem extends DataClass implements Insertable<TaskItem> {
       category: serializer.fromJson<int>(json['category']),
       isCompleted: serializer.fromJson<bool>(json['isCompleted']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
-      date: serializer.fromJson<DateTime?>(json['date']),
-      whenMarked: serializer.fromJson<DateTime?>(json['whenMarked']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      whenMarked: serializer.fromJson<DateTime>(json['whenMarked']),
       position: serializer.fromJson<int>(json['position']),
     );
   }
@@ -521,8 +519,8 @@ class TaskItem extends DataClass implements Insertable<TaskItem> {
       'category': serializer.toJson<int>(category),
       'isCompleted': serializer.toJson<bool>(isCompleted),
       'isFavorite': serializer.toJson<bool>(isFavorite),
-      'date': serializer.toJson<DateTime?>(date),
-      'whenMarked': serializer.toJson<DateTime?>(whenMarked),
+      'date': serializer.toJson<DateTime>(date),
+      'whenMarked': serializer.toJson<DateTime>(whenMarked),
       'position': serializer.toJson<int>(position),
     };
   }
@@ -534,8 +532,8 @@ class TaskItem extends DataClass implements Insertable<TaskItem> {
           int? category,
           bool? isCompleted,
           bool? isFavorite,
-          Value<DateTime?> date = const Value.absent(),
-          Value<DateTime?> whenMarked = const Value.absent(),
+          DateTime? date,
+          DateTime? whenMarked,
           int? position}) =>
       TaskItem(
         id: id ?? this.id,
@@ -544,8 +542,8 @@ class TaskItem extends DataClass implements Insertable<TaskItem> {
         category: category ?? this.category,
         isCompleted: isCompleted ?? this.isCompleted,
         isFavorite: isFavorite ?? this.isFavorite,
-        date: date.present ? date.value : this.date,
-        whenMarked: whenMarked.present ? whenMarked.value : this.whenMarked,
+        date: date ?? this.date,
+        whenMarked: whenMarked ?? this.whenMarked,
         position: position ?? this.position,
       );
   @override
@@ -589,8 +587,8 @@ class TaskItemsCompanion extends UpdateCompanion<TaskItem> {
   final Value<int> category;
   final Value<bool> isCompleted;
   final Value<bool> isFavorite;
-  final Value<DateTime?> date;
-  final Value<DateTime?> whenMarked;
+  final Value<DateTime> date;
+  final Value<DateTime> whenMarked;
   final Value<int> position;
   const TaskItemsCompanion({
     this.id = const Value.absent(),
@@ -649,8 +647,8 @@ class TaskItemsCompanion extends UpdateCompanion<TaskItem> {
       Value<int>? category,
       Value<bool>? isCompleted,
       Value<bool>? isFavorite,
-      Value<DateTime?>? date,
-      Value<DateTime?>? whenMarked,
+      Value<DateTime>? date,
+      Value<DateTime>? whenMarked,
       Value<int>? position}) {
     return TaskItemsCompanion(
       id: id ?? this.id,

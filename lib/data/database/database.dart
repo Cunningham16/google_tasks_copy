@@ -28,8 +28,11 @@ class TaskItems extends Table {
       integer().named('category_id').references(TaskCategories, #id)();
   BoolColumn get isCompleted => boolean()();
   BoolColumn get isFavorite => boolean()();
-  DateTimeColumn get date => dateTime().nullable()();
-  DateTimeColumn get whenMarked => dateTime().named("when_marked").nullable()();
+  //Костыль: дата при вставке может быть null, но если значение снова попытаться обратить в null он просто шлет тебя нахер
+  //Именно с этой целью делается дата 1 год нашей эры, он будет означать пустое значение даты
+  DateTimeColumn get date => dateTime().withDefault(Constant(DateTime(1)))();
+  DateTimeColumn get whenMarked =>
+      dateTime().named("when_marked").withDefault(Constant(DateTime(1)))();
   IntColumn get position => integer().withDefault(const Constant(-1))();
 }
 
@@ -92,6 +95,10 @@ class AppDatabase extends _$AppDatabase {
 
   Stream<List<TaskCategory>> watchCategories() {
     return (select(taskCategories)).watch();
+  }
+
+  Stream<List<TaskItem>> watchTasks() {
+    return (select(taskItems)).watch();
   }
 
   Future<void> saveTask(TaskItemsCompanion taskItemsCompanion) async {

@@ -4,21 +4,26 @@ import 'package:google_tasks/feature/components/completed_tasks_list.dart';
 
 import 'app_task.dart';
 
-class TaskNormalList extends StatelessWidget {
+class TaskNormalList extends StatefulWidget {
   const TaskNormalList({super.key, required this.taskItems});
 
   final Iterable<TaskItem> taskItems;
 
   @override
+  State<TaskNormalList> createState() => _TaskNormalListState();
+}
+
+class _TaskNormalListState extends State<TaskNormalList> {
+  @override
   Widget build(BuildContext context) {
-    List<TaskItem>? sortedList = taskItems.toList();
+    List<TaskItem>? sortedList = widget.taskItems.toList();
     sortedList.sort((a, b) => b.position.compareTo(a.position));
     Iterable<TaskItem>? uncompleted =
         sortedList.where((element) => element.isCompleted == false);
     Iterable<TaskItem>? completed =
         sortedList.where((element) => element.isCompleted == true);
 
-    return taskItems.isEmpty
+    return widget.taskItems.isEmpty
         ? const Center(child: Text('No tasks yet'))
         : MediaQuery.removePadding(
             context: context,
@@ -27,17 +32,8 @@ class TaskNormalList extends StatelessWidget {
               physics: const BouncingScrollPhysics(),
               child: Column(
                 children: [
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: uncompleted.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Material(
-                        color: Colors.transparent,
-                        child: AppTask(
-                          task: uncompleted.elementAt(index),
-                        ),
-                      );
-                    },
+                  Column(
+                    children: uncompleted.map((e) => AppTask(task: e)).toList(),
                   ),
                   if (completed.isNotEmpty)
                     Column(

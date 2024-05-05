@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/data/database/database.dart';
-import 'package:google_tasks/domain/task.repository.dart';
+import 'package:google_tasks/feature/category_bloc/category_bloc.dart';
 import 'package:google_tasks/feature/shared/sort_types.dart';
 
 import 'category_list_button.dart';
@@ -33,11 +33,9 @@ class SortSheet extends StatelessWidget {
               iconInfo:
                   category.sortType == SortTypes.byOwn ? Icons.done : null,
               onTap: () {
-                RepositoryProvider.of<TaskRepository>(context).updateCategory(
-                    category.id,
-                    category
-                        .copyWith(sortType: SortTypes.byOwn)
-                        .toCompanion(true));
+                context
+                    .read<CategoryBloc>()
+                    .add(CategoryChangedSort(category, SortTypes.byOwn));
                 Navigator.of(context).pop();
               },
             ),
@@ -46,11 +44,9 @@ class SortSheet extends StatelessWidget {
               iconInfo:
                   category.sortType == SortTypes.byDate ? Icons.done : null,
               onTap: () {
-                RepositoryProvider.of<TaskRepository>(context).updateCategory(
-                    category.id,
-                    category
-                        .copyWith(sortType: SortTypes.byDate)
-                        .toCompanion(true));
+                context
+                    .read<CategoryBloc>()
+                    .add(CategoryChangedSort(category, SortTypes.byDate));
                 Navigator.of(context).pop();
               }),
           CategoryListButton(
@@ -58,11 +54,9 @@ class SortSheet extends StatelessWidget {
               iconInfo:
                   category.sortType == SortTypes.byMarked ? Icons.done : null,
               onTap: () {
-                RepositoryProvider.of<TaskRepository>(context).updateCategory(
-                    category.id,
-                    category
-                        .copyWith(sortType: SortTypes.byMarked)
-                        .toCompanion(true));
+                context
+                    .read<CategoryBloc>()
+                    .add(CategoryChangedSort(category, SortTypes.byMarked));
                 Navigator.of(context).pop();
               })
         ],
