@@ -74,10 +74,25 @@ class _TaskDateListState extends State<TaskDateList> {
                                           child: Text(key),
                                         )
                                       ])
-                                        ..addAll(value.map((e) => AppTask(
+                                        ..addAll(value.map((e) => GestureDetector(
+                                          onLongPress: () {
+                                            ScaffoldMessenger.of(context)
+                                              ..clearSnackBars()
+                                              ..showSnackBar(SnackBar(
+                                                content: const Text(
+                                                    "Чтобы переместить задачу вверх или вниз в списке, отсортированном по дате, измените дату задачи"),
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                    BorderRadius.circular(
+                                                        8.0)),
+                                                behavior:
+                                                SnackBarBehavior.floating,
+                                              ));
+                                          },
+                                          child: AppTask(
                                               task: e,
-                                              hideChip: true,
-                                            ))))))
+                                              hideChip: true),
+                                        ))))))
                               .values
                               .toList()),
                       if (completed.isNotEmpty)

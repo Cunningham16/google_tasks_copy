@@ -53,9 +53,27 @@ class _TaskMarkedListState extends State<TaskMarkedList> {
                                             child: Text(key),
                                           )
                                         ])
-                                          ..addAll(value.map((e) => AppTask(
-                                                task: e,
-                                              )))));
+                                          ..addAll(value.map((e) => GestureDetector(
+                                            onLongPress: () {
+                                              ScaffoldMessenger.of(context)
+                                                ..clearSnackBars()
+                                                ..showSnackBar(SnackBar(
+                                                  content: const Text(
+                                                      "Перемещать задачи в этом режиме просмотра нельзя. Выберите другой режим просмотра"),
+                                                  shape:
+                                                  RoundedRectangleBorder(
+                                                      borderRadius:
+                                                      BorderRadius
+                                                          .circular(
+                                                          8.0)),
+                                                  behavior: SnackBarBehavior
+                                                      .floating,
+                                                ));
+                                            },
+                                            child: AppTask(
+                                                  task: e,
+                                                ),
+                                          )))));
                               })
                               .values
                               .toList()),

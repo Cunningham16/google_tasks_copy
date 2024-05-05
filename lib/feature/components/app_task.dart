@@ -7,12 +7,14 @@ import 'package:google_tasks/feature/screens/task_details.dart';
 import 'package:intl/intl.dart';
 
 class AppTask extends StatefulWidget {
-  const AppTask(
-      {super.key, required this.task, this.hideChip, this.onChangedCompletion});
+  const AppTask({
+    super.key,
+    required this.task,
+    this.hideChip,
+  });
 
   final TaskItem task;
   final bool? hideChip;
-  final ValueChanged<bool>? onChangedCompletion;
 
   @override
   State<AppTask> createState() => _AppTaskState();
