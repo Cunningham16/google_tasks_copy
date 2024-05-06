@@ -43,7 +43,7 @@ class _TaskDetailsState extends State<TaskDetails> {
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
-              icon: const Icon(Icons.arrow_left),
+              icon: const Icon(Icons.arrow_back),
               onPressed: () {
                 if (previousTaskState != null) {
                   context
@@ -62,9 +62,15 @@ class _TaskDetailsState extends State<TaskDetails> {
                           taskItem.copyWith(isFavorite: !taskItem.isFavorite),
                           taskItem.id));
                     },
-                    icon: taskItem.isFavorite
-                        ? const Icon(Icons.star)
-                        : const Icon(Icons.star_border_outlined)),
+                    icon: Icon(
+                      taskItem.isFavorite
+                          ? Icons.star
+                          : Icons.star_border_outlined,
+                      size: 25,
+                      color: taskItem.isFavorite
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
+                    )),
                 PopupMenuButton(
                     itemBuilder: (BuildContext context) => <PopupMenuEntry>[
                           PopupMenuItem(
@@ -108,14 +114,23 @@ class _TaskDetailsState extends State<TaskDetails> {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Text(context
-                          .read<CategoryBloc>()
-                          .state
-                          .categoryList
-                          .firstWhere(
-                              (element) => element.id == taskItem.category)
-                          .name),
-                      const Icon(Icons.arrow_drop_down, size: 20)
+                      Text(
+                        context
+                            .read<CategoryBloc>()
+                            .state
+                            .categoryList
+                            .firstWhere(
+                                (element) => element.id == taskItem.category)
+                            .name,
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary),
+                      ),
+                      const Gap(5),
+                      Icon(
+                        Icons.arrow_drop_down,
+                        size: 25,
+                        color: Theme.of(context).colorScheme.primary,
+                      )
                     ],
                   ),
                 ),
@@ -137,16 +152,17 @@ class _TaskDetailsState extends State<TaskDetails> {
               const Gap(20),
               TextField(
                 minLines: 1,
-                maxLines: 7,
+                maxLines: 3,
                 controller: contentTextController,
                 onChanged: (value) => context.read<TaskBloc>().add(TaskUpdated(
                     taskItem.copyWith(content: value), taskItem.id)),
                 decoration: const InputDecoration(
                     contentPadding: EdgeInsets.zero,
-                    prefixIcon: Padding(
-                        padding: EdgeInsets.only(right: 10, left: 10),
+                    prefixIcon: Align(
+                        widthFactor: 1.0,
+                        heightFactor: 1.0,
                         child: Icon(Icons.format_align_left)),
-                    border: InputBorder.none,
+                    border: OutlineInputBorder(borderSide: BorderSide.none),
                     labelText: "Добавьте подзаголовок",
                     floatingLabelBehavior: FloatingLabelBehavior.never),
               ),

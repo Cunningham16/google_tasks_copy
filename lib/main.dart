@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
             title: 'Google Tasks Copy',
             theme: ThemeData(
               useMaterial3: true,
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
+              colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF0099cc)),
             ),
             home: const HomeScreen(),
           ),

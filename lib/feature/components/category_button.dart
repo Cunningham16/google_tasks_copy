@@ -9,8 +9,13 @@ class CategoryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tab(
-        child: Row(children: [
-      Text(category.name),
-    ]));
+      text: category.id != 1 ? category.name : null,
+      icon: category.id == 1
+          ? const Icon(
+              Icons.star,
+              size: 25,
+            )
+          : null,
+    );
   }
 }

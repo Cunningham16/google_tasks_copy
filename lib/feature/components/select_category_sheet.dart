@@ -13,23 +13,35 @@ class SelectCategorySheet extends StatelessWidget {
     return Container(
         padding: const EdgeInsets.all(10),
         child: BlocBuilder<CategoryBloc, CategoryState>(
-          builder: (context, state) => ListView.builder(
-              shrinkWrap: true,
-              itemCount: state.categoryList.length,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0) {
-                  return Container();
-                }
-                return CategoryListButton(
-                  onTap: () {
-                    Navigator.of(context).pop(state.categoryList[index].id);
-                  },
-                  title: state.categoryList[index].name,
-                  iconInfo: state.categoryList[index].id == currentCategory
-                      ? Icons.done
-                      : null,
-                );
-              }),
+          builder: (context, state) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Text(
+                  "Куда отправить задачу?",
+                  style: TextStyle(color: Colors.black54, fontSize: 13),
+                ),
+              ),
+              ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: state.categoryList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == 0) {
+                      return Container();
+                    }
+                    return CategoryListButton(
+                      onTap: () {
+                        Navigator.of(context).pop(state.categoryList[index].id);
+                      },
+                      title: state.categoryList[index].name,
+                      iconInfo: state.categoryList[index].id == currentCategory
+                          ? Icons.done
+                          : null,
+                    );
+                  }),
+            ],
+          ),
         ));
   }
 }

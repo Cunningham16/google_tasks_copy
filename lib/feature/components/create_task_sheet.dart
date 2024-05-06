@@ -109,13 +109,20 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text(context
-                            .read<CategoryBloc>()
-                            .state
-                            .categoryList
-                            .firstWhere((element) => element.id == category)
-                            .name),
-                        const Icon(Icons.arrow_drop_down, size: 20)
+                        Text(
+                            context
+                                .read<CategoryBloc>()
+                                .state
+                                .categoryList
+                                .firstWhere((element) => element.id == category)
+                                .name,
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary)),
+                        Icon(
+                          Icons.arrow_drop_down,
+                          size: 25,
+                          color: Theme.of(context).colorScheme.primary,
+                        )
                       ],
                     ),
                   ),
@@ -190,9 +197,15 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                       onPressed: () {
                         toggleIsFavorite();
                       },
-                      icon: isFavorite || widget.isFavoriteFlag
-                          ? const Icon(Icons.star)
-                          : const Icon(Icons.star_border_outlined)),
+                      icon: Icon(
+                        isFavorite || widget.isFavoriteFlag
+                            ? Icons.star
+                            : Icons.star_border_outlined,
+                        size: 25,
+                        color: isFavorite || widget.isFavoriteFlag
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                      )),
                   const Spacer(),
                   TextButton(
                       onPressed: title != ""
@@ -211,9 +224,10 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                                           ? true
                                           : isFavorite),
                                       date: Value(date),
-                                      whenMarked: Value(widget.isFavoriteFlag
-                                          ? DateTime.now()
-                                          : DateTime(1)),
+                                      whenMarked: Value(
+                                          widget.isFavoriteFlag || isFavorite
+                                              ? DateTime.now()
+                                              : DateTime(1)),
                                       position: Value(widget.taskCount))));
                               Navigator.of(context).pop();
                             }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/data/database/database.dart';
-import 'package:google_tasks/domain/task_repository.dart';
 import 'package:google_tasks/feature/category_bloc/category_bloc.dart';
 import 'package:google_tasks/feature/screens/create_list.dart';
 import 'package:google_tasks/feature/task_bloc/tasks_bloc.dart';
@@ -24,12 +23,11 @@ class MoreSheet extends StatelessWidget {
         children: [
           InkWell(
             onTap: () async {
+              final CategoryBloc bloc = context.read<CategoryBloc>();
               final newNameTab = await Navigator.of(context)
                   .push(CreateListScreen.route(taskCategory.name)) as String;
               if (!context.mounted) return;
-              RepositoryProvider.of<TaskRepository>(context).updateCategory(
-                  taskCategory.id,
-                  taskCategory.copyWith(name: newNameTab).toCompanion(true));
+              bloc.add(CategoryRenamed(taskCategory, newNameTab));
               Navigator.of(context).pop();
             },
             child: Container(

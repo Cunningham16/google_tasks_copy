@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/data/database/database.dart';
 import 'package:google_tasks/feature/components/completed_tasks_list.dart';
@@ -17,38 +16,30 @@ class TaskNormalList extends StatefulWidget {
 }
 
 class _TaskNormalListState extends State<TaskNormalList> {
-  List<TaskItem> sortedList = [];
+  bool isStateChangingFast = false;
   List<TaskItem> uncompleted = [];
 
   @override
   void initState() {
     setState(() {
-      sortedList = widget.taskItems.toList();
-    });
-    setState(() {
       uncompleted =
-          sortedList.where((element) => element.isCompleted == false).toList();
+          widget.taskItems.where((element) => !element.isCompleted).toList();
+      uncompleted.sort(
+        (a, b) => a.position.compareTo(b.position),
+      );
     });
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant TaskNormalList oldWidget) {
-    setState(() {
-      sortedList = widget.taskItems.toList();
-    });
-    List<TaskItem> uncompletedRaw =
-        sortedList.where((element) => element.isCompleted == false).toList();
-    uncompletedRaw.sort((a, b) => b.position.compareTo(a.position));
-    if (uncompletedRaw == uncompleted &&
-        uncompletedRaw.length == uncompleted.length) {
+    if (!isStateChangingFast) {
       setState(() {
-        uncompleted = uncompletedRaw;
-      });
-    } else if (uncompletedRaw != uncompleted &&
-        uncompletedRaw.length != uncompleted.length) {
-      setState(() {
-        uncompleted = uncompletedRaw;
+        uncompleted =
+            widget.taskItems.where((element) => !element.isCompleted).toList();
+        uncompleted.sort(
+          (a, b) => a.position.compareTo(b.position),
+        );
       });
     }
     super.didUpdateWidget(oldWidget);
@@ -56,6 +47,7 @@ class _TaskNormalListState extends State<TaskNormalList> {
 
   @override
   Widget build(BuildContext context) {
+    List<TaskItem> sortedList = widget.taskItems.toList();
     List<TaskItem>? completed =
         sortedList.where((element) => element.isCompleted == true).toList();
 
@@ -83,11 +75,19 @@ class _TaskNormalListState extends State<TaskNormalList> {
                       });
 
                       for (int i = 0; i < uncompleted.length; i++) {
+                        if (i == 0) {
+                          setState(() {
+                            isStateChangingFast = true;
+                          });
+                        }
                         taskBloc.add(TaskUpdated(
-                            uncompleted
-                                .toList()[i]
-                                .copyWith(position: uncompleted.length - i),
+                            uncompleted.toList()[i].copyWith(position: i),
                             uncompleted.toList()[i].id));
+                        if (i == uncompleted.length - 1) {
+                          setState(() {
+                            isStateChangingFast = false;
+                          });
+                        }
                       }
                     },
                     itemBuilder: (context, index) => AppTask(
