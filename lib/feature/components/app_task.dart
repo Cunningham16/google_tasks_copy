@@ -36,7 +36,7 @@ class _AppTaskState extends State<AppTask> {
             child: Container(
               padding: const EdgeInsets.all(6),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Checkbox(
                     value: taskItem.isCompleted,

@@ -1,12 +1,8 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
+
 import 'package:google_tasks/feature/shared/sort_types.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
-import 'package:sqlite3/sqlite3.dart';
+import 'config/shared.dart' as impl;
 
 part 'database.g.dart';
 
@@ -45,7 +41,7 @@ class TasksWithCategories {
 
 @DriftDatabase(tables: [TaskItems, TaskCategories])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(impl.connect());
 
   //Не думал, что придется добавлять RxDart, но он здорово выручил здесь
   Stream<List<TasksWithCategories>> queryCategoriesWithTasks() {
@@ -151,16 +147,4 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => 1;
-}
-
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'db.sqlite'));
-    final cachebase = (await getTemporaryDirectory()).path;
-
-    sqlite3.tempDirectory = cachebase;
-
-    return NativeDatabase.createInBackground(file);
-  });
 }

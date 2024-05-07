@@ -90,9 +90,15 @@ class _TaskNormalListState extends State<TaskNormalList> {
                         }
                       }
                     },
-                    itemBuilder: (context, index) => AppTask(
-                          task: uncompleted.toList()[index],
+                    buildDefaultDragHandles: false,
+                    itemBuilder: (context, index) =>
+                        ReorderableDragStartListener(
                           key: Key("${uncompleted.toList()[index].id}"),
+                          index: index,
+                          child: AppTask(
+                            task: uncompleted.toList()[index],
+                            key: Key("${uncompleted.toList()[index].id}"),
+                          ),
                         )),
                 if (completed.isNotEmpty)
                   Column(
