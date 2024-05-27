@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 
-import 'package:google_tasks/feature/shared/sort_types.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:google_tasks/utils/enums/sort_types.dart';
 import 'config/shared.dart' as impl;
 
 part 'database.g.dart';
@@ -42,29 +41,6 @@ class TasksWithCategories {
 @DriftDatabase(tables: [TaskItems, TaskCategories])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.connect());
-
-  //Не думал, что придется добавлять RxDart, но он здорово выручил здесь
-  Stream<List<TasksWithCategories>> queryCategoriesWithTasks() {
-    final categories = select(taskCategories).watch();
-    final tasks = select(taskItems).watch();
-
-    return Rx.combineLatest2(
-        categories,
-        tasks,
-        (categoryList, b) => categoryList.map((category) {
-              List<TaskItem> tasksOfCategory;
-              if (categoryList.indexOf(category) == 0) {
-                tasksOfCategory =
-                    b.where((element) => element.isFavorite == true).toList();
-              } else {
-                tasksOfCategory = b
-                    .where((element) => element.category == category.id)
-                    .toList();
-              }
-
-              return TasksWithCategories(category, tasksOfCategory);
-            }).toList());
-  }
 
   Future<TaskCategory> getCategoryById(int id) async {
     return (select(taskCategories)..where((tbl) => tbl.id.equals(id)))

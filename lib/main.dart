@@ -3,13 +3,15 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/data/database/database.dart';
-import 'package:google_tasks/domain/shared_pref_repository.dart';
-import 'package:google_tasks/domain/task_repository.dart';
-import 'package:google_tasks/feature/category_bloc/category_bloc.dart';
-import 'package:google_tasks/feature/task_bloc/tasks_bloc.dart';
-import 'package:google_tasks/feature/cubit/home_page_cubit.dart';
-import 'package:google_tasks/feature/screens/home_page.dart';
+import 'package:google_tasks/data/repositories/shared_pref_repository_impl.dart';
+import 'package:google_tasks/data/repositories/task_repository_impl.dart';
+import 'package:google_tasks/domain/repositories/task_repository.dart';
+import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
+import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
+import 'package:google_tasks/presentation/cubit/home_page_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:google_tasks/presentation/screens/screens.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,10 +64,10 @@ class MyApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider(
-          create: (context) => TaskRepository(db: db),
+          create: (context) => TaskRepositoryImpl(database: db),
         ),
         RepositoryProvider(
-            create: (context) => SharedPreferencesRepository(sp: sp))
+            create: (context) => SharedPrefRepositoryImpl(sp: sp))
       ],
       child: Builder(builder: (context) {
         TaskRepository taskRepo =
@@ -86,7 +88,8 @@ class MyApp extends StatelessWidget {
             title: 'Google Tasks Copy',
             theme: ThemeData(
               useMaterial3: true,
-              colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF0099cc)),
+              colorScheme:
+                  ColorScheme.fromSeed(seedColor: const Color(0xFF0099cc)),
             ),
             home: const HomeScreen(),
           ),
