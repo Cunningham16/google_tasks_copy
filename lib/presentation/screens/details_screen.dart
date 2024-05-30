@@ -9,12 +9,11 @@ import 'package:intl/intl.dart';
 import '../components/sheets/sheets.dart';
 
 class TaskDetails extends StatefulWidget {
-  const TaskDetails({super.key, required this.task});
+  const TaskDetails({super.key, required this.taskId});
 
-  final TaskItem task;
+  final int taskId;
 
-  static Route<void> route(TaskItem taskItem) =>
-      MaterialPageRoute<void>(builder: (_) => TaskDetails(task: taskItem));
+  static String get route => "/tasks/:id";
 
   @override
   State<TaskDetails> createState() => _TaskDetailsState();
@@ -37,8 +36,8 @@ class _TaskDetailsState extends State<TaskDetails> {
   Widget build(BuildContext context) {
     return BlocBuilder<TaskBloc, TaskState>(
       builder: (context, state) {
-        TaskItem taskItem = state.taskList
-            .firstWhere((element) => element.id == widget.task.id);
+        TaskItem taskItem =
+            state.taskList.firstWhere((element) => element.id == widget.taskId);
         titleTextController.text = taskItem.title;
         contentTextController.text = taskItem.content;
         return Scaffold(

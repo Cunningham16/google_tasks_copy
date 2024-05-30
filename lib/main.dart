@@ -1,34 +1,30 @@
 import 'dart:developer';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/repositories/auth_repository_impl.dart';
+import 'package:google_tasks/data/repositories/category_repository_impl.dart';
 import 'package:google_tasks/data/repositories/shared_pref_repository_impl.dart';
 import 'package:google_tasks/data/repositories/task_repository_impl.dart';
 import 'package:google_tasks/domain/repositories/task_repository.dart';
+import 'package:google_tasks/firebase_options.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
 import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
 import 'package:google_tasks/presentation/cubit/home_page_cubit.dart';
+import 'package:google_tasks/presentation/router/router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:google_tasks/presentation/screens/screens.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  AppDatabase database = AppDatabase();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
   CurrentTabCubit currentTabCubit = CurrentTabCubit();
-
-  if (sharedPreferences.getInt("currentTab") == null) {
-    List<TaskCategory> firstCategory =
-        await database.select(database.taskCategories).get();
-    sharedPreferences.setInt("currentTab", firstCategory[0].id);
-    currentTabCubit.changeTab(firstCategory[0].id);
-  } else {
-    currentTabCubit.changeTab(sharedPreferences.getInt("currentTab")!);
-  }
 
   //Bloc.observer = SimpleBlocObserver();
 
@@ -38,7 +34,6 @@ void main() async {
 
   runApp(MyApp(
     cubit: currentTabCubit,
-    db: database,
     sp: sharedPreferences,
   ));
 }
@@ -52,10 +47,8 @@ class SimpleBlocObserver extends BlocObserver {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp(
-      {super.key, required this.db, required this.sp, required this.cubit});
+  const MyApp({super.key, required this.sp, required this.cubit});
 
-  final AppDatabase db;
   final SharedPreferences sp;
   final CurrentTabCubit cubit;
 
@@ -64,10 +57,12 @@ class MyApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider(
-          create: (context) => TaskRepositoryImpl(database: db),
+          create: (context) => TaskRepositoryImpl(),
         ),
         RepositoryProvider(
-            create: (context) => SharedPrefRepositoryImpl(sp: sp))
+            create: (context) => SharedPrefRepositoryImpl(sp: sp)),
+        RepositoryProvider(create: (_) => CategoryRepositoryImpl()),
+        RepositoryProvider(create: (_) => AuthRepositoryImpl())
       ],
       child: Builder(builder: (context) {
         TaskRepository taskRepo =
@@ -83,7 +78,7 @@ class MyApp extends StatelessWidget {
                 create: (_) => CategoryBloc(taskRepository: taskRepo)
                   ..add(const CategorySubscriptionRequested()))
           ],
-          child: MaterialApp(
+          child: MaterialApp.router(
             debugShowCheckedModeBanner: false,
             title: 'Google Tasks Copy',
             theme: ThemeData(
@@ -91,7 +86,7 @@ class MyApp extends StatelessWidget {
               colorScheme:
                   ColorScheme.fromSeed(seedColor: const Color(0xFF0099cc)),
             ),
-            home: const HomeScreen(),
+            routerConfig: router,
           ),
         );
       }),

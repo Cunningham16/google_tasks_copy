@@ -5,13 +5,7 @@ class CreateListScreen extends StatefulWidget {
 
   final String? name;
 
-  static Route<void> route(String? name) {
-    return MaterialPageRoute<void>(
-      builder: (_) => CreateListScreen(
-        name: name,
-      ),
-    );
-  }
+  static String get route => "/createList";
 
   @override
   State<CreateListScreen> createState() => _CreateListState();

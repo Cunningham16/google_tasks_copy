@@ -1,8 +1,8 @@
-import 'package:drift/drift.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:google_tasks/data/database/database.dart';
 import 'package:google_tasks/domain/repositories/shared_pref_repository.dart';
@@ -22,6 +22,8 @@ import "../screens/screens.dart";
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  static String get route => "/home";
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -172,9 +174,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ..add(Tab(
                           child: InkWell(
                             onTap: () async {
-                              final newCategoryName =
-                                  await Navigator.of(context).push<void>(
-                                      CreateListScreen.route("")) as String;
+                              final newCategoryName = await context
+                                  .pushNamed(CreateListScreen.route) as String;
                               if (!context.mounted) return;
                               context.read<CategoryBloc>().add(CategoryCreated(
                                   TaskCategoriesCompanion(

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_tasks/data/database/database.dart';
 import 'package:google_tasks/domain/repositories/task_repository.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
@@ -22,8 +23,7 @@ class _CategoryListSheetState extends State<CategoryListSheet> {
   Future<void> _createTaskList() async {
     CategoryBloc bloc = context.read<CategoryBloc>();
 
-    final newCategoryName = await Navigator.of(context)
-        .push<void>(CreateListScreen.route("")) as String;
+    final newCategoryName = context.pushNamed(CreateListScreen.route) as String;
 
     if (!context.mounted) return;
 

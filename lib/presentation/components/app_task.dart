@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import 'package:google_tasks/data/database/database.dart';
@@ -27,7 +28,7 @@ class AppTask extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              Navigator.of(context).push(TaskDetails.route(taskItem));
+              context.go(TaskDetails.route);
             },
             child: Container(
               padding: const EdgeInsets.all(6),

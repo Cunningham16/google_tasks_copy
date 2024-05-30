@@ -1,26 +1,15 @@
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/entities/task_item/task_item.dart';
 
 abstract class TaskRepository {
-  Future<void> deleteTask(int id);
+  Future<void> deleteTask(String id);
 
-  Future<void> deleteAllCompletedTasks(int categoryId);
+  Future<void> deleteAllCompletedTasks(String categoryId);
 
-  Future<void> saveTask(TaskItemsCompanion entity);
+  Future<void> saveTask(TaskItem taskItem);
 
-  Future<void> updateTask(int id, TaskItemsCompanion taskItem);
+  Future<void> updateTask(String id, TaskItem taskItem);
 
-  Stream<TaskItem> watchSingleTask(int taskId);
-
-  Future<void> saveCategory(TaskCategoriesCompanion entity);
-
-  Future<void> updateCategory(
-      id, TaskCategoriesCompanion taskCategoriesCompanion);
-
-  Future<void> deleteCategory(int id);
-
-  Stream<List<TaskCategory>> watchCategories();
-
-  Future<TaskCategory> getCategoryById(int id);
+  Future<TaskItem> getSingleTask(String id);
 
   Stream<List<TaskItem>> watchAllTasks();
 }
