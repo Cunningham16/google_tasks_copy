@@ -12,7 +12,7 @@ _$TaskItemImpl _$$TaskItemImplFromJson(Map<String, dynamic> json) =>
       userId: json['userId'] as String,
       title: json['title'] as String,
       content: json['content'] as String?,
-      category: (json['category'] as num).toInt(),
+      category: json['category'] as String,
       isCompleted: json['isCompleted'] as bool,
       isFavorite: json['isFavorite'] as bool,
       date: _$JsonConverterFromJson<Timestamp, DateTime>(

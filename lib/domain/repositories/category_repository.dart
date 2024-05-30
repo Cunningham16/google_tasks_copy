@@ -7,5 +7,5 @@ abstract class CategoryRepository {
 
   Future<void> deleteCategory(String id);
 
-  Stream<List<TaskCategory>> watchCategories(String userId);
+  Stream<List<TaskCategory>> watchCategories();
 }

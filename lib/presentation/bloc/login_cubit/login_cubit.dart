@@ -20,7 +20,7 @@ class LoginCubit extends Cubit<LoginState> {
     try {
       Email email = Email((email) => email..value = value);
       emit(state.copyWith(email: email, emailStatus: EmailStatus.valid));
-    } on ArgumentError catch (e) {
+    } on ArgumentError {
       emit(state.copyWith(emailStatus: EmailStatus.invalid));
     }
   }
@@ -30,17 +30,26 @@ class LoginCubit extends Cubit<LoginState> {
       Password password = Password((password) => password..value = value);
       emit(state.copyWith(
           password: password, passwordStatus: PasswordStatus.valid));
-    } on ArgumentError catch (e) {
+    } on ArgumentError {
       emit(state.copyWith(emailStatus: EmailStatus.invalid));
     }
   }
 
   Future<void> login() async {
+    if (!(state.emailStatus == EmailStatus.valid) ||
+        !(state.passwordStatus == PasswordStatus.valid)) {
+      emit(state.copyWith(formStatus: FormStatus.invalid));
+      emit(state.copyWith(formStatus: FormStatus.initial));
+      return;
+    }
+
+    emit(state.copyWith(formStatus: FormStatus.submissionInProgress));
+
     try {
       await _loginUseCase(
           LoginParams(email: state.email!, password: state.password!));
       emit(state.copyWith(formStatus: FormStatus.submissionSuccess));
-    } catch (e) {
+    } on ArgumentError {
       emit(state.copyWith(formStatus: FormStatus.submissionFailure));
     }
   }

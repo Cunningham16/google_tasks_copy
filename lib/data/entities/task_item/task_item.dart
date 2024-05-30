@@ -23,7 +23,7 @@ class TaskItem with _$TaskItem {
       required String userId,
       required String title,
       String? content,
-      required int category,
+      required String category,
       required bool isCompleted,
       required bool isFavorite,
       @TimestampConverter() DateTime? date,

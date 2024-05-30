@@ -24,7 +24,7 @@ mixin _$TaskItem {
   String get userId => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
   String? get content => throw _privateConstructorUsedError;
-  int get category => throw _privateConstructorUsedError;
+  String get category => throw _privateConstructorUsedError;
   bool get isCompleted => throw _privateConstructorUsedError;
   bool get isFavorite => throw _privateConstructorUsedError;
   @TimestampConverter()
@@ -49,7 +49,7 @@ abstract class $TaskItemCopyWith<$Res> {
       String userId,
       String title,
       String? content,
-      int category,
+      String category,
       bool isCompleted,
       bool isFavorite,
       @TimestampConverter() DateTime? date,
@@ -101,7 +101,7 @@ class _$TaskItemCopyWithImpl<$Res, $Val extends TaskItem>
       category: null == category
           ? _value.category
           : category // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
       isCompleted: null == isCompleted
           ? _value.isCompleted
           : isCompleted // ignore: cast_nullable_to_non_nullable
@@ -139,7 +139,7 @@ abstract class _$$TaskItemImplCopyWith<$Res>
       String userId,
       String title,
       String? content,
-      int category,
+      String category,
       bool isCompleted,
       bool isFavorite,
       @TimestampConverter() DateTime? date,
@@ -189,7 +189,7 @@ class __$$TaskItemImplCopyWithImpl<$Res>
       category: null == category
           ? _value.category
           : category // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
       isCompleted: null == isCompleted
           ? _value.isCompleted
           : isCompleted // ignore: cast_nullable_to_non_nullable
@@ -241,7 +241,7 @@ class _$TaskItemImpl implements _TaskItem {
   @override
   final String? content;
   @override
-  final int category;
+  final String category;
   @override
   final bool isCompleted;
   @override
@@ -307,7 +307,7 @@ abstract class _TaskItem implements TaskItem {
       required final String userId,
       required final String title,
       final String? content,
-      required final int category,
+      required final String category,
       required final bool isCompleted,
       required final bool isFavorite,
       @TimestampConverter() final DateTime? date,
@@ -326,7 +326,7 @@ abstract class _TaskItem implements TaskItem {
   @override
   String? get content;
   @override
-  int get category;
+  String get category;
   @override
   bool get isCompleted;
   @override
