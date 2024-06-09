@@ -6,7 +6,7 @@ import 'package:google_tasks/presentation/components/category_select_button.dart
 class SelectCategorySheet extends StatelessWidget {
   const SelectCategorySheet({super.key, required this.currentCategory});
 
-  final int currentCategory;
+  final String currentCategory;
 
   @override
   Widget build(BuildContext context) {

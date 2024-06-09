@@ -1,19 +1,37 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_tasks/data/database/database.dart';
-import 'package:google_tasks/domain/repositories/task_repository.dart';
+import 'package:google_tasks/data/entities/task_item/task_item.dart';
+import 'package:google_tasks/domain/use_cases/delete_task_use_case.dart';
+import 'package:google_tasks/domain/use_cases/delete_tasks_by_category_use_case.dart';
+import 'package:google_tasks/domain/use_cases/delete_tasks_by_completed_use_case.dart';
+import 'package:google_tasks/domain/use_cases/get_single_task_use_case.dart';
+import 'package:google_tasks/domain/use_cases/save_task_use_case.dart';
+import 'package:google_tasks/domain/use_cases/update_task_use_case.dart';
+import 'package:google_tasks/domain/use_cases/watch_all_tasks_use_case.dart';
 
 part "tasks_event.dart";
 part "tasks_state.dart";
 
 class TaskBloc extends Bloc<TaskEvent, TaskState> {
-  TaskBloc({
-    required TaskRepository taskRepository,
-  })  : _taskRepository = taskRepository,
-        super(const TaskState()) {
+  final SaveTaskUseCase saveTaskUseCase;
+  final DeleteTaskUseCase deleteTaskUseCase;
+  final UpdateTaskUseCase updateTaskUseCase;
+  final WatchAllTasksUseCase watchAllTasksUseCase;
+  final GetSingleTaskUseCase getSingleTaskUseCase;
+  final DeleteTasksByCategoryUseCase deleteTasksByCategoryUseCase;
+  final DeleteTasksByCompletedUseCase deleteTasksByCompletedUseCase;
+
+  TaskBloc(
+      {required this.saveTaskUseCase,
+      required this.deleteTaskUseCase,
+      required this.updateTaskUseCase,
+      required this.watchAllTasksUseCase,
+      required this.getSingleTaskUseCase,
+      required this.deleteTasksByCategoryUseCase,
+      required this.deleteTasksByCompletedUseCase})
+      : super(const TaskState()) {
     on<TaskSubscribtionRequested>(_onTaskSubcriptionRequested);
     on<TaskCreated>(_onTaskCreated);
-    on<TaskCompletionToggled>(_onTaskCompletionToggled);
     on<TaskDeleted>(_onTaskDeleted);
     on<TaskUpdated>(_onTaskUpdated);
     on<TaskUndoChanged>(_onTaskUndoChanged);
@@ -23,40 +41,43 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<TaskUpdatedCategory>(_onTaskUpdatedCategory);
     on<TaskUpdatedCategoryUndo>(_onTaskUpdatedCategoryUndo);
     on<TaskUpdatedCategoryDump>(_onTaskUpdatedCategoryDump);
+    on<TasksDeletedByCategory>(_onTasksDeletedByCategory);
+    on<GetSingleTask>(_onGetSingleTask);
   }
-
-  final TaskRepository _taskRepository;
 
   Future<void> _onTaskSubcriptionRequested(
       TaskSubscribtionRequested event, Emitter<TaskState> emit) async {
     emit(state.copyWith(status: () => TaskStatus.loading));
 
-    await emit.forEach(_taskRepository.watchAllTasks(),
+    await emit.forEach(watchAllTasksUseCase(),
         onData: (data) => state.copyWith(
             status: () => TaskStatus.success, taskList: () => data));
   }
 
+  Future<void> _onGetSingleTask(
+      GetSingleTask event, Emitter<TaskState> emit) async {}
+
   Future<void> _onTaskCreated(
       TaskCreated event, Emitter<TaskState> emit) async {
-    await _taskRepository.saveTask(event.companion);
+    await saveTaskUseCase(event.params);
   }
 
   Future<void> _onTaskDeleted(
       TaskDeleted event, Emitter<TaskState> emit) async {
     emit(state.copyWith(lastDeletedTask: () => event.taskItem));
-    await _taskRepository.deleteTask(event.taskItem.id);
+    await deleteTaskUseCase(event.taskItem.id);
   }
 
   Future<void> _onTaskUpdated(
       TaskUpdated event, Emitter<TaskState> emit) async {
-    await _taskRepository.updateTask(
-        event.index, event.newTaskItem.toCompanion(true));
+    await updateTaskUseCase(
+        UpdateTaskParams(id: event.index, taskItem: event.newTaskItem));
   }
 
   Future<void> _onTaskUndoChanged(
       TaskUndoChanged event, Emitter<TaskState> emit) async {
-    await _taskRepository.updateTask(
-        event.index, state.lastCompletedTask!.toCompanion(true));
+    await updateTaskUseCase(
+        UpdateTaskParams(id: event.index, taskItem: state.lastCompletedTask!));
     emit(state.copyWith(lastCompletedTask: () => null));
   }
 
@@ -65,19 +86,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     emit(state.copyWith(lastCompletedTask: () => null));
   }
 
-  Future<void> _onTaskCompletionToggled(
-      TaskCompletionToggled event, Emitter<TaskState> emit) async {
-    emit(state.copyWith(lastCompletedTask: () => event.taskItem));
-    await _taskRepository.updateTask(
-        event.taskItem.id,
-        event.taskItem
-            .copyWith(isCompleted: event.isCompleted)
-            .toCompanion(true));
-  }
-
   Future<void> _onTaskClearedAllCompleted(
       TaskClearedAllCompleted event, Emitter<TaskState> emit) async {
-    await _taskRepository.deleteAllCompletedTasks(event.categoryId);
+    await deleteTasksByCompletedUseCase(categoryId: event.categoryId);
   }
 
   Future<void> _onTaskLastDeletedDumped(
@@ -92,12 +103,18 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   Future<void> _onTaskUpdatedCategoryUndo(
       TaskUpdatedCategoryUndo event, Emitter<TaskState> emit) async {
-    await _taskRepository.updateTask(state.lastUpdatedCategoryTask!.id,
-        state.lastUpdatedCategoryTask!.toCompanion(true));
+    await updateTaskUseCase(UpdateTaskParams(
+        id: state.lastUpdatedCategoryTask!.id,
+        taskItem: state.lastCompletedTask!));
   }
 
   Future<void> _onTaskUpdatedCategoryDump(
       TaskUpdatedCategoryDump event, Emitter<TaskState> emit) async {
     emit(state.copyWith(lastUpdatedCategoryTask: () => null));
+  }
+
+  Future<void> _onTasksDeletedByCategory(
+      TasksDeletedByCategory event, Emitter<TaskState> emit) async {
+    await deleteTasksByCategoryUseCase(categoryId: event.categoryId);
   }
 }

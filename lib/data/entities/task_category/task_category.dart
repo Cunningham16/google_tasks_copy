@@ -12,6 +12,7 @@ class TaskCategory with _$TaskCategory {
     required String name,
     required bool isDeleteable,
     required SortTypes sortType,
+    required bool isFavoriteFlag,
   }) = _TaskCategory;
 
   factory TaskCategory.fromJson(Map<String, dynamic> json) =>

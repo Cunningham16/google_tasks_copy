@@ -61,4 +61,20 @@ class TaskRepositoryImpl implements TaskRepository {
       }).toList();
     });
   }
+
+  @override
+  Future<void> deleteTasksByCategory(String categoryId) async {
+    final batch = _instanceStore.batch();
+    final collection = await _instanceStore
+        .collection("/tasks")
+        .where(Filter.and(
+          Filter("userId", isEqualTo: _instanceAuth.currentUser!.uid),
+          Filter("category", isEqualTo: categoryId),
+        ))
+        .get();
+    for (final doc in collection.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+  }
 }

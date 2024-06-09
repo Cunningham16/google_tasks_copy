@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/entities/task_item/task_item.dart';
 import 'package:google_tasks/presentation/views/completed_tasks_list.dart';
 import 'package:intl/intl.dart';
 
@@ -34,7 +34,7 @@ class _TaskDateListState extends State<TaskDateList> {
       if (b.date == DateTime(1)) {
         return 1;
       }
-      return a.date.compareTo(b.date);
+      return a.date!.compareTo(b.date!);
     });
 
     var list = taskItems.toList().map((element) => element.date).toList();
@@ -42,15 +42,15 @@ class _TaskDateListState extends State<TaskDateList> {
     Map<String, List<TaskItem>> map = {};
 
     for (int i = 0; i < list.length; i++) {
-      if (list[i] == DateTime(1)) {
+      if (list[i] == null) {
         map["Без даты"] =
             taskItems.where((element) => element.date == DateTime(1)).toList();
       } else {
-        map[DateFormat.MMMd().format(list[i])] = taskItems
+        map[DateFormat.MMMd().format(list[i]!)] = taskItems
             .where((element) =>
                 element.date != DateTime(1) &&
-                DateFormat.MMMd().format(element.date) ==
-                    DateFormat.MMMd().format(list[i]))
+                DateFormat.MMMd().format(element.date!) ==
+                    DateFormat.MMMd().format(list[i]!))
             .toList();
       }
     }

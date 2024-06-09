@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/entities/task_category/task_category.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
 import 'package:google_tasks/presentation/components/sheets/sort_sheet.dart';
 import 'package:google_tasks/presentation/cubit/home_page_cubit.dart';
@@ -49,7 +49,7 @@ class BottomBar extends StatelessWidget {
               size: 25,
             ),
           ),
-          if (taskCategory.id != 1)
+          if (tabController.index == 0)
             IconButton(
               onPressed: () {
                 _displayBottomSheet(

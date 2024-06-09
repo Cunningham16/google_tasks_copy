@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/entities/task_category/task_category.dart';
+import 'package:google_tasks/domain/use_cases/update_category_use_case.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
 import 'package:google_tasks/utils/enums/sort_types.dart';
 
@@ -19,9 +20,9 @@ class SortSheet extends StatefulWidget {
 
 class _SortSheetState extends State<SortSheet> {
   void _selectSortType(SortTypes sortType) {
-    context
-        .read<CategoryBloc>()
-        .add(CategoryChangedSort(widget.category, sortType));
+    context.read<CategoryBloc>().add(CategoryUpdated(UpdateCategoryParams(
+        id: widget.category.id,
+        modifiedCategory: widget.category.copyWith(sortType: sortType))));
     Navigator.of(context).pop();
   }
 

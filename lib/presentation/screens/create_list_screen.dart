@@ -5,7 +5,7 @@ class CreateListScreen extends StatefulWidget {
 
   final String? name;
 
-  static String get route => "/createList";
+  static String get route => "category/create";
 
   @override
   State<CreateListScreen> createState() => _CreateListState();

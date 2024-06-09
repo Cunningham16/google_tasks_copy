@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/entities/task_category/task_category.dart';
 
 class CategoryButton extends StatelessWidget {
   const CategoryButton({super.key, required this.category});

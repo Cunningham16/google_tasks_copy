@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_tasks/data/entities/task_item/task_item.dart';
 import 'package:intl/intl.dart';
 
-import 'package:google_tasks/data/database/database.dart';
 import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
 import 'package:google_tasks/presentation/screens/screens.dart';
 
@@ -15,7 +15,7 @@ class AppTask extends StatelessWidget {
     this.hideChip,
   });
 
-  final int taskId;
+  final String taskId;
   final bool? hideChip;
 
   @override
@@ -62,21 +62,21 @@ class AppTask extends StatelessWidget {
                                 fontWeight: FontWeight.w400),
                       ),
                       const Gap(8),
-                      if (taskItem.content.isNotEmpty)
+                      if (taskItem.content != null)
                         SizedBox(
                           width: 100,
                           child: Text(
                             overflow: TextOverflow.ellipsis,
                             maxLines: 2,
-                            taskItem.content.replaceAll("\n", " "),
+                            taskItem.content!.replaceAll("\n", " "),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ),
                       const Gap(5),
-                      if (taskItem.date != DateTime(1) && hideChip == null)
+                      if (taskItem.date != null && hideChip == null)
                         Chip(
                             label: Text(
-                          DateFormat.MMMd().format(taskItem.date),
+                          DateFormat.MMMd().format(taskItem.date!),
                           style: Theme.of(context).textTheme.bodyMedium,
                         )),
                     ],

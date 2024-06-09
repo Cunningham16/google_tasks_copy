@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/entities/task_item/task_item.dart';
 import 'package:google_tasks/presentation/views/completed_tasks_list.dart';
 import 'package:intl/intl.dart';
 
@@ -31,13 +31,13 @@ class _TaskMarkedListState extends State<TaskMarkedList> {
     map["Давно отмеченные"] = taskItems
         .where((element) =>
             element.whenMarked != DateTime(1) &&
-            DateFormat.MMMd().format(element.whenMarked) !=
+            DateFormat.MMMd().format(element.whenMarked!) !=
                 DateFormat.MMMd().format(DateTime.now()))
         .toList();
     map["Недавно отмеченные"] = taskItems
         .where((element) =>
             element.whenMarked != DateTime(1) &&
-            DateFormat.MMMd().format(element.whenMarked) ==
+            DateFormat.MMMd().format(element.whenMarked!) ==
                 DateFormat.MMMd().format(DateTime.now()))
         .toList();
     map["Без пометки"] = taskItems

@@ -12,12 +12,12 @@ final class TaskSubscribtionRequested extends TaskEvent {
 }
 
 final class TaskCreated extends TaskEvent {
-  const TaskCreated(this.companion);
+  const TaskCreated(this.params);
 
-  final TaskItemsCompanion companion;
+  final SaveTaskParams params;
 
   @override
-  List<Object> get props => [companion];
+  List<Object> get props => [params];
 }
 
 final class TaskCompletionToggled extends TaskEvent {
@@ -33,7 +33,7 @@ final class TaskCompletionToggled extends TaskEvent {
 final class TaskUndoChanged extends TaskEvent {
   const TaskUndoChanged(this.index);
 
-  final int index;
+  final String index;
 
   @override
   List<Object> get props => [index];
@@ -56,7 +56,7 @@ final class TaskUpdated extends TaskEvent {
   const TaskUpdated(this.newTaskItem, this.index);
 
   final TaskItem newTaskItem;
-  final int index;
+  final String index;
 
   @override
   List<Object> get props => [index, newTaskItem];
@@ -65,7 +65,7 @@ final class TaskUpdated extends TaskEvent {
 final class TaskClearedAllCompleted extends TaskEvent {
   const TaskClearedAllCompleted(this.categoryId);
 
-  final int categoryId;
+  final String categoryId;
 
   @override
   List<Object> get props => [categoryId];
@@ -90,4 +90,22 @@ final class TaskUpdatedCategoryUndo extends TaskEvent {
 
 final class TaskUpdatedCategoryDump extends TaskEvent {
   const TaskUpdatedCategoryDump();
+}
+
+final class TasksDeletedByCategory extends TaskEvent {
+  const TasksDeletedByCategory(this.categoryId);
+
+  final String categoryId;
+
+  @override
+  List<Object> get props => [categoryId];
+}
+
+final class GetSingleTask extends TaskEvent {
+  const GetSingleTask(this.taskId);
+
+  final String taskId;
+
+  @override
+  List<Object> get props => [taskId];
 }

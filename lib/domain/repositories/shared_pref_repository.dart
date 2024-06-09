@@ -1,5 +1,5 @@
 abstract class SharedPreferencesRepository {
-  int? getLastTab();
+  String? getLastTab();
 
-  void setLastTab(int number);
+  void setLastTab(String id);
 }

@@ -13,6 +13,7 @@ _$TaskCategoryImpl _$$TaskCategoryImplFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       isDeleteable: json['isDeleteable'] as bool,
       sortType: $enumDecode(_$SortTypesEnumMap, json['sortType']),
+      isFavoriteFlag: json['isFavoriteFlag'] as bool,
     );
 
 Map<String, dynamic> _$$TaskCategoryImplToJson(_$TaskCategoryImpl instance) =>
@@ -22,6 +23,7 @@ Map<String, dynamic> _$$TaskCategoryImplToJson(_$TaskCategoryImpl instance) =>
       'name': instance.name,
       'isDeleteable': instance.isDeleteable,
       'sortType': _$SortTypesEnumMap[instance.sortType]!,
+      'isFavoriteFlag': instance.isFavoriteFlag,
     };
 
 const _$SortTypesEnumMap = {

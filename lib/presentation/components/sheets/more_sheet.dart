@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_tasks/data/database/database.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_tasks/data/entities/task_category/task_category.dart';
+import 'package:google_tasks/data/entities/task_item/task_item.dart';
+import 'package:google_tasks/domain/use_cases/update_category_use_case.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
 import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
 
@@ -85,11 +88,13 @@ class _MoreSheetState extends State<MoreSheet> {
           InkWell(
             onTap: () async {
               final CategoryBloc bloc = context.read<CategoryBloc>();
-              final newNameTab = await Navigator.of(context)
-                      .push(CreateListScreen.route(widget.taskCategory.name))
-                  as String;
+              final newNameTab =
+                  await context.pushNamed(CreateListScreen.route) as String;
               if (!context.mounted) return;
-              bloc.add(CategoryRenamed(widget.taskCategory, newNameTab));
+              bloc.add(CategoryUpdated(UpdateCategoryParams(
+                  id: widget.taskCategory.id,
+                  modifiedCategory:
+                      widget.taskCategory.copyWith(name: newNameTab))));
               Navigator.of(context).pop();
             },
             child: Container(
@@ -97,13 +102,13 @@ class _MoreSheetState extends State<MoreSheet> {
                 child: const Row(children: [Text("Переименовать список")])),
           ),
           InkWell(
-            onTap: widget.taskCategory.isDeletable
+            onTap: widget.taskCategory.isDeleteable
                 ? () async => deleteTaskList
                 : null,
-            highlightColor: widget.taskCategory.isDeletable
+            highlightColor: widget.taskCategory.isDeleteable
                 ? Colors.black.withOpacity(0.09)
                 : Colors.transparent,
-            splashColor: widget.taskCategory.isDeletable
+            splashColor: widget.taskCategory.isDeleteable
                 ? Colors.black.withOpacity(0.09)
                 : Colors.transparent,
             child: Container(
@@ -111,7 +116,7 @@ class _MoreSheetState extends State<MoreSheet> {
                 child: Row(children: [
                   Text("Удалить список",
                       style: TextStyle(
-                          color: !widget.taskCategory.isDeletable
+                          color: !widget.taskCategory.isDeleteable
                               ? Colors.black26
                               : Colors.black87))
                 ])),

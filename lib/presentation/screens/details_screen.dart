@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/entities/task_item/task_item.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
 import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
+import 'package:google_tasks/service_locator.dart';
 import 'package:intl/intl.dart';
 
 import '../components/sheets/sheets.dart';
@@ -11,9 +12,9 @@ import '../components/sheets/sheets.dart';
 class TaskDetails extends StatefulWidget {
   const TaskDetails({super.key, required this.taskId});
 
-  final int taskId;
+  final String taskId;
 
-  static String get route => "/tasks/:id";
+  static String get route => ":id";
 
   @override
   State<TaskDetails> createState() => _TaskDetailsState();
@@ -39,15 +40,14 @@ class _TaskDetailsState extends State<TaskDetails> {
         TaskItem taskItem =
             state.taskList.firstWhere((element) => element.id == widget.taskId);
         titleTextController.text = taskItem.title;
-        contentTextController.text = taskItem.content;
+        contentTextController.text = taskItem.content ?? "";
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
                 if (previousTaskState != null) {
-                  context
-                      .read<TaskBloc>()
+                  serviceLocator<TaskBloc>()
                       .add(TaskUpdatedCategory(previousTaskState!));
                 }
                 Navigator.of(context).pop();
@@ -58,7 +58,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                 const Spacer(),
                 IconButton(
                     onPressed: () {
-                      context.read<TaskBloc>().add(TaskUpdated(
+                      serviceLocator<TaskBloc>().add(TaskUpdated(
                           taskItem.copyWith(isFavorite: !taskItem.isFavorite),
                           taskItem.id));
                     },
@@ -76,8 +76,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                           PopupMenuItem(
                               onTap: () {
                                 Navigator.of(context).pop();
-                                context
-                                    .read<TaskBloc>()
+                                serviceLocator<TaskBloc>()
                                     .add(TaskDeleted(taskItem));
                               },
                               child: const SizedBox(
@@ -92,8 +91,8 @@ class _TaskDetailsState extends State<TaskDetails> {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               InkWell(
                 onTap: () async {
-                  final TaskBloc bloc = context.read<TaskBloc>();
-                  final int? selectedCategory = await _displayBottomSheet(
+                  final TaskBloc bloc = serviceLocator<TaskBloc>();
+                  final String? selectedCategory = await _displayBottomSheet(
                       context,
                       SelectCategorySheet(
                         currentCategory: taskItem.category,
@@ -114,7 +113,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                   }
 
                   bloc.add(TaskUpdated(
-                      taskItem.copyWith(category: selectedCategory),
+                      taskItem.copyWith(category: selectedCategory as String),
                       taskItem.id));
                 },
                 child: Padding(
@@ -125,8 +124,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        context
-                            .read<CategoryBloc>()
+                        serviceLocator<CategoryBloc>()
                             .state
                             .categoryList
                             .firstWhere(
@@ -150,7 +148,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                 maxLines: 7,
                 style: const TextStyle(fontSize: 24),
                 controller: titleTextController,
-                onChanged: (value) => context.read<TaskBloc>().add(
+                onChanged: (value) => serviceLocator<TaskBloc>().add(
                     TaskUpdated(taskItem.copyWith(title: value), taskItem.id)),
                 decoration: const InputDecoration(
                     contentPadding: EdgeInsets.only(left: 15),
@@ -164,8 +162,9 @@ class _TaskDetailsState extends State<TaskDetails> {
                 minLines: 1,
                 maxLines: 3,
                 controller: contentTextController,
-                onChanged: (value) => context.read<TaskBloc>().add(TaskUpdated(
-                    taskItem.copyWith(content: value), taskItem.id)),
+                onChanged: (value) => serviceLocator<TaskBloc>().add(
+                    TaskUpdated(
+                        taskItem.copyWith(content: value), taskItem.id)),
                 decoration: const InputDecoration(
                     contentPadding: EdgeInsets.zero,
                     prefixIcon: Align(
@@ -185,7 +184,7 @@ class _TaskDetailsState extends State<TaskDetails> {
                           lastDate: DateTime(2030))
                       .then((value) {
                     if (value != null) {
-                      context.read<TaskBloc>().add(TaskUpdated(
+                      serviceLocator<TaskBloc>().add(TaskUpdated(
                           taskItem.copyWith(date: value), taskItem.id));
                     }
                   });
@@ -198,16 +197,16 @@ class _TaskDetailsState extends State<TaskDetails> {
                       const Gap(2),
                       const Icon(Icons.event),
                       const Gap(12.5),
-                      taskItem.date != DateTime(1)
+                      taskItem.date != null
                           ? Chip(
                               deleteIcon: const Icon(
                                 Icons.close,
                                 size: 15,
                               ),
-                              label:
-                                  Text(DateFormat.MMMd().format(taskItem.date)),
+                              label: Text(
+                                  DateFormat.MMMd().format(taskItem.date!)),
                               onDeleted: () {
-                                context.read<TaskBloc>().add(TaskUpdated(
+                                serviceLocator<TaskBloc>().add(TaskUpdated(
                                     taskItem.copyWith(date: DateTime(1)),
                                     taskItem.id));
                               },
@@ -224,7 +223,7 @@ class _TaskDetailsState extends State<TaskDetails> {
               alignment: Alignment.centerRight,
               child: InkWell(
                 onTap: () {
-                  context.read<TaskBloc>().add(
+                  serviceLocator<TaskBloc>().add(
                       TaskCompletionToggled(taskItem, !taskItem.isCompleted));
                   Navigator.of(context).pop();
                 },

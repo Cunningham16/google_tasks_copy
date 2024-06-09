@@ -11,5 +11,7 @@ abstract class TaskRepository {
 
   Future<TaskItem> getSingleTask(String id);
 
+  Future<void> deleteTasksByCategory(String categoryId);
+
   Stream<List<TaskItem>> watchAllTasks();
 }

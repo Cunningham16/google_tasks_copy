@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/entities/task_item/task_item.dart';
 import 'package:google_tasks/presentation/components/app_task.dart';
 
 class CompletedTasksList extends StatefulWidget {

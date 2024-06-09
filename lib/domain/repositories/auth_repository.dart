@@ -4,7 +4,9 @@ import 'package:google_tasks/domain/value_objects/email.dart';
 import 'package:google_tasks/domain/value_objects/password.dart';
 
 abstract class AuthRepository {
-  Stream<AppUser> get userInfo;
+  Stream<AppUser> get userInfoStream;
+
+  AppUser get userInfo;
 
   Future<UserCredential> login(
       {required Email email, required Password password});

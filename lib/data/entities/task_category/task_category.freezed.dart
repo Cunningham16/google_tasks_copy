@@ -25,6 +25,7 @@ mixin _$TaskCategory {
   String get name => throw _privateConstructorUsedError;
   bool get isDeleteable => throw _privateConstructorUsedError;
   SortTypes get sortType => throw _privateConstructorUsedError;
+  bool get isFavoriteFlag => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -43,7 +44,8 @@ abstract class $TaskCategoryCopyWith<$Res> {
       String userId,
       String name,
       bool isDeleteable,
-      SortTypes sortType});
+      SortTypes sortType,
+      bool isFavoriteFlag});
 }
 
 /// @nodoc
@@ -64,6 +66,7 @@ class _$TaskCategoryCopyWithImpl<$Res, $Val extends TaskCategory>
     Object? name = null,
     Object? isDeleteable = null,
     Object? sortType = null,
+    Object? isFavoriteFlag = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -86,6 +89,10 @@ class _$TaskCategoryCopyWithImpl<$Res, $Val extends TaskCategory>
           ? _value.sortType
           : sortType // ignore: cast_nullable_to_non_nullable
               as SortTypes,
+      isFavoriteFlag: null == isFavoriteFlag
+          ? _value.isFavoriteFlag
+          : isFavoriteFlag // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -103,7 +110,8 @@ abstract class _$$TaskCategoryImplCopyWith<$Res>
       String userId,
       String name,
       bool isDeleteable,
-      SortTypes sortType});
+      SortTypes sortType,
+      bool isFavoriteFlag});
 }
 
 /// @nodoc
@@ -122,6 +130,7 @@ class __$$TaskCategoryImplCopyWithImpl<$Res>
     Object? name = null,
     Object? isDeleteable = null,
     Object? sortType = null,
+    Object? isFavoriteFlag = null,
   }) {
     return _then(_$TaskCategoryImpl(
       id: null == id
@@ -144,6 +153,10 @@ class __$$TaskCategoryImplCopyWithImpl<$Res>
           ? _value.sortType
           : sortType // ignore: cast_nullable_to_non_nullable
               as SortTypes,
+      isFavoriteFlag: null == isFavoriteFlag
+          ? _value.isFavoriteFlag
+          : isFavoriteFlag // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -156,7 +169,8 @@ class _$TaskCategoryImpl implements _TaskCategory {
       required this.userId,
       required this.name,
       required this.isDeleteable,
-      required this.sortType});
+      required this.sortType,
+      required this.isFavoriteFlag});
 
   factory _$TaskCategoryImpl.fromJson(Map<String, dynamic> json) =>
       _$$TaskCategoryImplFromJson(json);
@@ -171,10 +185,12 @@ class _$TaskCategoryImpl implements _TaskCategory {
   final bool isDeleteable;
   @override
   final SortTypes sortType;
+  @override
+  final bool isFavoriteFlag;
 
   @override
   String toString() {
-    return 'TaskCategory(id: $id, userId: $userId, name: $name, isDeleteable: $isDeleteable, sortType: $sortType)';
+    return 'TaskCategory(id: $id, userId: $userId, name: $name, isDeleteable: $isDeleteable, sortType: $sortType, isFavoriteFlag: $isFavoriteFlag)';
   }
 
   @override
@@ -188,13 +204,15 @@ class _$TaskCategoryImpl implements _TaskCategory {
             (identical(other.isDeleteable, isDeleteable) ||
                 other.isDeleteable == isDeleteable) &&
             (identical(other.sortType, sortType) ||
-                other.sortType == sortType));
+                other.sortType == sortType) &&
+            (identical(other.isFavoriteFlag, isFavoriteFlag) ||
+                other.isFavoriteFlag == isFavoriteFlag));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, userId, name, isDeleteable, sortType);
+  int get hashCode => Object.hash(
+      runtimeType, id, userId, name, isDeleteable, sortType, isFavoriteFlag);
 
   @JsonKey(ignore: true)
   @override
@@ -216,7 +234,8 @@ abstract class _TaskCategory implements TaskCategory {
       required final String userId,
       required final String name,
       required final bool isDeleteable,
-      required final SortTypes sortType}) = _$TaskCategoryImpl;
+      required final SortTypes sortType,
+      required final bool isFavoriteFlag}) = _$TaskCategoryImpl;
 
   factory _TaskCategory.fromJson(Map<String, dynamic> json) =
       _$TaskCategoryImpl.fromJson;
@@ -231,6 +250,8 @@ abstract class _TaskCategory implements TaskCategory {
   bool get isDeleteable;
   @override
   SortTypes get sortType;
+  @override
+  bool get isFavoriteFlag;
   @override
   @JsonKey(ignore: true)
   _$$TaskCategoryImplCopyWith<_$TaskCategoryImpl> get copyWith =>

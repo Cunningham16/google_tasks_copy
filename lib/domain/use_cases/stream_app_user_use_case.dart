@@ -8,7 +8,7 @@ class StreamAppUserUseCase {
 
   Stream<AppUser> call() {
     try {
-      return authRepository.userInfo;
+      return authRepository.userInfoStream;
     } catch (e) {
       throw Exception(e);
     }

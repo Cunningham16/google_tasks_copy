@@ -2,11 +2,15 @@ import 'package:google_tasks/domain/repositories/shared_pref_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefRepositoryImpl implements SharedPreferencesRepository {
-  const SharedPrefRepositoryImpl({required SharedPreferences sp}) : _sp = sp;
+  late SharedPreferences _sp;
 
-  final SharedPreferences _sp;
+  Future<void> call() async {
+    _sp = await SharedPreferences.getInstance();
+  }
 
-  int? getLastTab() => _sp.getInt("currentTab");
+  @override
+  String? getLastTab() => _sp.getString("currentTab");
 
-  void setLastTab(int number) => _sp.setInt("currentTab", number);
+  @override
+  void setLastTab(String id) => _sp.setString("currentTab", id);
 }

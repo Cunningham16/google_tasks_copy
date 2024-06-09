@@ -1,10 +1,11 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/domain/repositories/shared_pref_repository.dart';
+import 'package:google_tasks/domain/use_cases/save_task_use_case.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
 import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
 import 'package:google_tasks/presentation/cubit/home_page_cubit.dart';
+import 'package:google_tasks/service_locator.dart';
 import 'package:intl/intl.dart';
 
 import '../sheets/sheets.dart';
@@ -30,7 +31,8 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
   String content = '';
   DateTime date = DateTime(1);
   bool isFavorite = false;
-  int category = 2;
+  String category =
+      serviceLocator<SharedPreferencesRepository>().getLastTab() ?? "";
 
   bool isContentVisible = false;
 
@@ -77,7 +79,7 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CurrentTabCubit, int>(
+    return BlocBuilder<CurrentTabCubit, String>(
       builder: (context, state) {
         return Container(
           padding: EdgeInsets.only(
@@ -92,7 +94,7 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
               if (widget.isFavoriteFlag)
                 InkWell(
                   onTap: () async {
-                    final int? selectedCategory = await _displayBottomSheet(
+                    final String? selectedCategory = await _displayBottomSheet(
                         context,
                         SelectCategorySheet(
                           currentCategory: category,
@@ -211,25 +213,32 @@ class _CreateTaskSheetState extends State<CreateTaskSheet> {
                   TextButton(
                       onPressed: title != ""
                           ? () {
-                              context.read<TaskBloc>().add(TaskCreated(
-                                  TaskItemsCompanion(
-                                      title: Value(title),
-                                      content: Value(content),
-                                      category: Value(widget.isFavoriteFlag
-                                          ? category
-                                          : context
-                                              .read<CurrentTabCubit>()
-                                              .state),
-                                      isCompleted: const Value(false),
-                                      isFavorite: Value(widget.isFavoriteFlag
+                              serviceLocator<TaskBloc>().add(TaskCreated(
+                                  SaveTaskParams(
+                                      title: title,
+                                      content: content,
+                                      isCompleted: false,
+                                      isFavorite: widget.isFavoriteFlag
                                           ? true
-                                          : isFavorite),
-                                      date: Value(date),
-                                      whenMarked: Value(
+                                          : isFavorite,
+                                      date: date,
+                                      whenMarked:
                                           widget.isFavoriteFlag || isFavorite
                                               ? DateTime.now()
-                                              : DateTime(1)),
-                                      position: Value(widget.taskCount))));
+                                              : null,
+                                      category: widget.isFavoriteFlag
+                                          ? category
+                                          : context
+                                              .read<CategoryBloc>()
+                                              .state
+                                              .categoryList
+                                              .firstWhere((element) =>
+                                                  element.id ==
+                                                  context
+                                                      .read<CurrentTabCubit>()
+                                                      .state)
+                                              .id,
+                                      position: widget.taskCount)));
                               Navigator.of(context).pop();
                             }
                           : null,

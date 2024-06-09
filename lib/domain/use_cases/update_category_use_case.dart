@@ -6,7 +6,7 @@ class UpdateCategoryUseCase {
 
   const UpdateCategoryUseCase({required this.categoryRepository});
 
-  Future<void> call(UpdateCategoryParams params) async {
+  Future<void> call({required UpdateCategoryParams params}) async {
     try {
       await categoryRepository.updateCategory(
           params.id, params.modifiedCategory);

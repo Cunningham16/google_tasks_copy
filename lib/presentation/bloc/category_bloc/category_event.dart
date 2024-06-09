@@ -12,22 +12,21 @@ final class CategorySubscriptionRequested extends CategoryEvent {
 }
 
 final class CategoryCreated extends CategoryEvent {
-  const CategoryCreated(this.companion);
+  const CategoryCreated(this.params);
 
-  final TaskCategoriesCompanion companion;
+  final SaveCategoryParams params;
 
   @override
-  List<Object> get props => [companion];
+  List<Object> get props => [params];
 }
 
-final class CategoryRenamed extends CategoryEvent {
-  const CategoryRenamed(this.taskCategory, this.newName);
+final class CategoryUpdated extends CategoryEvent {
+  const CategoryUpdated(this.params);
 
-  final TaskCategory taskCategory;
-  final String newName;
+  final UpdateCategoryParams params;
 
   @override
-  List<Object> get props => [taskCategory, newName];
+  List<Object> get props => [params];
 }
 
 final class CategoryDeleted extends CategoryEvent {
@@ -37,14 +36,4 @@ final class CategoryDeleted extends CategoryEvent {
 
   @override
   List<Object> get props => [taskCategory];
-}
-
-final class CategoryChangedSort extends CategoryEvent {
-  const CategoryChangedSort(this.taskCategory, this.sortType);
-
-  final TaskCategory taskCategory;
-  final SortTypes sortType;
-
-  @override
-  List<Object> get props => [taskCategory, sortType];
 }

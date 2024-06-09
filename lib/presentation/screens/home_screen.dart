@@ -4,14 +4,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/entities/task_category/task_category.dart';
+import 'package:google_tasks/data/entities/task_item/task_item.dart';
 import 'package:google_tasks/domain/repositories/shared_pref_repository.dart';
+import 'package:google_tasks/domain/use_cases/save_category_use_case.dart';
+import 'package:google_tasks/domain/use_cases/save_task_use_case.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
 import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
 import 'package:google_tasks/presentation/views/task_date_lists.dart';
 import 'package:google_tasks/presentation/views/task_marked_list.dart';
 import 'package:google_tasks/presentation/views/task_normal_list.dart';
-import 'package:google_tasks/presentation/cubit/home_page_cubit.dart';
+import 'package:google_tasks/service_locator.dart';
 import 'package:google_tasks/utils/enums/sort_types.dart';
 
 import '../components/bottom_bar.dart';
@@ -34,10 +37,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void changeCurrentTab(int currentTabIndex, List<TaskCategory> categories) {
     TaskCategory currentTab = categories[currentTabIndex];
-    SharedPreferencesRepository sharedPreferencesRepository =
-        context.read<SharedPreferencesRepository>();
-    sharedPreferencesRepository.setLastTab(currentTab.id);
-    context.read<CurrentTabCubit>().changeTab(currentTab.id);
+    serviceLocator<SharedPreferencesRepository>().setLastTab(currentTab.id);
   }
 
   @override
@@ -62,12 +62,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     action: SnackBarAction(
                         label: "Отменить",
                         onPressed: () {
-                          context.read<TaskBloc>().add(
+                          serviceLocator<TaskBloc>().add(
                               TaskUndoChanged(state.lastCompletedTask!.id));
-                          context.read<TaskBloc>().add(const TaskLastDumped());
+                          serviceLocator<TaskBloc>()
+                              .add(const TaskLastDumped());
                         }),
                   )).closed.then((value) =>
-                      context.read<TaskBloc>().add(const TaskLastDumped()));
+                      serviceLocator<TaskBloc>().add(const TaskLastDumped()));
               }),
           BlocListener<TaskBloc, TaskState>(
             listenWhen: (previous, current) =>
@@ -83,12 +84,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   action: SnackBarAction(
                       label: "Отменить",
                       onPressed: () {
-                        context.read<TaskBloc>().add(TaskCreated(
-                            state.lastDeletedTask!.toCompanion(true)));
-                        context.read<TaskBloc>().add(const TaskLastDumped());
+                        TaskItem lastDeletedTask =
+                            serviceLocator<TaskBloc>().state.lastDeletedTask!;
+                        serviceLocator<TaskBloc>().add(TaskCreated(
+                            SaveTaskParams(
+                                title: lastDeletedTask.title,
+                                isCompleted: lastDeletedTask.isCompleted,
+                                category: lastDeletedTask.category,
+                                date: lastDeletedTask.date,
+                                isFavorite: lastDeletedTask.isFavorite,
+                                position: lastDeletedTask.position,
+                                content: lastDeletedTask.content)));
+                        serviceLocator<TaskBloc>().add(const TaskLastDumped());
                       }),
                 )).closed.then((value) =>
-                    context.read<TaskBloc>().add(const TaskLastDumped()));
+                    serviceLocator<TaskBloc>().add(const TaskLastDumped()));
             },
           ),
           BlocListener<TaskBloc, TaskState>(
@@ -98,8 +108,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   current.lastUpdatedCategoryTask != null;
             },
             listener: (context, state) {
-              final String newCategoryName = context
-                  .read<CategoryBloc>()
+              final String nextCategoryName = serviceLocator<CategoryBloc>()
                   .state
                   .categoryList
                   .firstWhere((element) =>
@@ -116,19 +125,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(8.0)),
                   behavior: SnackBarBehavior.floating,
                   content:
-                      Text('Задача перемещена в список "$newCategoryName"'),
+                      Text('Задача перемещена в список "$nextCategoryName"'),
                   action: SnackBarAction(
                       label: "Отменить",
                       onPressed: () {
-                        context
-                            .read<TaskBloc>()
+                        serviceLocator<TaskBloc>()
                             .add(const TaskUpdatedCategoryUndo());
-                        context
-                            .read<TaskBloc>()
+                        serviceLocator<TaskBloc>()
                             .add(const TaskUpdatedCategoryDump());
                       }),
-                )).closed.then((value) => context
-                    .read<TaskBloc>()
+                )).closed.then((value) => serviceLocator<TaskBloc>()
                     .add(const TaskUpdatedCategoryDump()));
             },
           )
@@ -144,8 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               initialIndex: state.categoryList.isNotEmpty
                   ? state.categoryList.indexWhere((element) =>
                       element.id ==
-                      RepositoryProvider.of<SharedPreferencesRepository>(
-                              context)
+                      serviceLocator<SharedPreferencesRepository>()
                           .getLastTab())
                   : 0);
           tabController.onIndexChange(
@@ -178,9 +183,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   .pushNamed(CreateListScreen.route) as String;
                               if (!context.mounted) return;
                               context.read<CategoryBloc>().add(CategoryCreated(
-                                  TaskCategoriesCompanion(
-                                      name: Value(newCategoryName),
-                                      sortType: const Value(SortTypes.byOwn))));
+                                  SaveCategoryParams(
+                                      name: newCategoryName,
+                                      isDeleteable: true,
+                                      sortType: SortTypes.byOwn)));
                             },
                             child: const Row(
                               children: [
@@ -201,12 +207,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   return TabBarView(
                     controller: tabController,
                     children: List.from(state.categoryList.map((e) {
-                      if (e.id == 1) {
-                        return TaskDateList(
-                            taskItems: taskState.taskList
-                                .where((element) => element.isFavorite));
+                      //Категория с положительным флагом должна быть одна
+                      if (e.isFavoriteFlag) {
+                        switch (e.sortType) {
+                          case SortTypes.byDate:
+                            return TaskDateList(
+                                taskItems: taskState.taskList
+                                    .where((element) => element.isFavorite));
+                          case SortTypes.byMarked:
+                            return TaskMarkedList(
+                                taskItems: taskState.taskList
+                                    .where((element) => element.isFavorite));
+                          default:
+                        }
                       }
-
                       switch (e.sortType) {
                         case SortTypes.byOwn:
                           return TaskNormalList(

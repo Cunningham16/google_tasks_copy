@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_tasks/data/database/database.dart';
+import 'package:google_tasks/data/entities/task_item/task_item.dart';
 import 'package:google_tasks/presentation/views/completed_tasks_list.dart';
 import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
 

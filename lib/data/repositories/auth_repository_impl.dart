@@ -8,11 +8,20 @@ class AuthRepositoryImpl implements AuthRepository {
   FirebaseAuth authInstance = FirebaseAuth.instance;
 
   @override
-  Stream<AppUser> get userInfo {
+  Stream<AppUser> get userInfoStream {
     return authInstance.authStateChanges().map((user) {
       return AppUser(
           id: user!.uid, email: user.email ?? '', name: user.displayName!);
     });
+  }
+
+  @override
+  AppUser get userInfo {
+    final currentUser = authInstance.currentUser!;
+    return AppUser(
+        id: currentUser.uid,
+        email: currentUser.email!,
+        name: currentUser.displayName!);
   }
 
   @override
