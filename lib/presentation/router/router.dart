@@ -23,6 +23,7 @@ import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
 import 'package:google_tasks/presentation/cubit/home_page_cubit.dart';
 import 'package:google_tasks/presentation/screens/auth_screen.dart';
 import 'package:google_tasks/presentation/screens/screens.dart';
+import 'package:google_tasks/presentation/screens/settings_screen.dart';
 import 'package:google_tasks/service_locator.dart';
 
 final GoRouter router = GoRouter(
@@ -82,6 +83,11 @@ final GoRouter router = GoRouter(
             builder: (context, state) => CreateListScreen(
               name: state.uri.queryParameters["name"],
             ),
+          ),
+          GoRoute(
+            path: SettingsScreen.route,
+            name: SettingsScreen.route,
+            builder: (context, state) => const SettingsScreen(),
           ),
         ]),
   ],

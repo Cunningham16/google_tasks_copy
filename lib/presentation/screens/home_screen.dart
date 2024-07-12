@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +15,7 @@ import 'package:google_tasks/domain/use_cases/stream_app_user_use_case.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
 import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
 import 'package:google_tasks/presentation/cubit/home_page_cubit.dart';
+import 'package:google_tasks/presentation/screens/settings_screen.dart';
 import 'package:google_tasks/presentation/views/task_date_lists.dart';
 import 'package:google_tasks/presentation/views/task_marked_list.dart';
 import 'package:google_tasks/presentation/views/task_normal_list.dart';
@@ -165,7 +164,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return BlocBuilder<CategoryBloc, CategoryState>(
                 builder: (context, state) {
               if (state.categoryList.isEmpty) {
-                return const Center(child: CupertinoActivityIndicator());
+                return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()));
               }
 
               return DefaultTabController(
@@ -178,14 +178,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (DefaultTabController.of(context).indexIsChanging) {
                       int index = DefaultTabController.of(context).index;
                       changeCurrentTab(index);
-                      log("tapped tab with index ${index}");
                     } else {
                       int index = DefaultTabController.of(context)
                           .animation!
                           .value
                           .round();
                       changeCurrentTab(index);
-                      log("swiped tab with index ${index}");
                     }
                   });
                   return Scaffold(
@@ -202,13 +200,24 @@ class _HomeScreenState extends State<HomeScreen> {
                             stretch: true,
                             forceElevated: innerBoxIsScrolled,
                             leading: IconButton(
-                                icon: const Icon(Icons.verified_user),
-                                onPressed: () async {
-                                  LogoutUseCase(
-                                          authRepository:
-                                              serviceLocator<AuthRepository>())
-                                      .call();
-                                }),
+                              icon: const Icon(Icons.settings),
+                              onPressed: () {
+                                context.pushNamed(SettingsScreen.route);
+                              },
+                            ),
+                            actions: [
+                              IconButton(
+                                  icon: const Icon(Icons.account_circle),
+                                  onPressed: () async {
+                                    LogoutUseCase(
+                                            sharedPreferencesRepository:
+                                                serviceLocator<
+                                                    SharedPreferencesRepository>(),
+                                            authRepository: serviceLocator<
+                                                AuthRepository>())
+                                        .call();
+                                  })
+                            ],
                             title: const Text(
                               "Задачи",
                             ),

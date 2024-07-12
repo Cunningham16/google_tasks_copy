@@ -71,8 +71,9 @@ initServiceLocator() async {
   serviceLocator.registerLazySingleton(
       () => LoginUseCase(authRepository: serviceLocator()));
 
-  serviceLocator.registerLazySingleton(
-      () => LogoutUseCase(authRepository: serviceLocator()));
+  serviceLocator.registerLazySingleton(() => LogoutUseCase(
+      authRepository: serviceLocator(),
+      sharedPreferencesRepository: serviceLocator()));
 
   serviceLocator.registerLazySingleton(() => RegisterUseCase(
       authRepository: serviceLocator(), categoryRepository: serviceLocator()));

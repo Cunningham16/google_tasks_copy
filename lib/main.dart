@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/domain/repositories/shared_pref_repository.dart';
 import 'package:google_tasks/firebase_options.dart';
+import 'package:google_tasks/presentation/bloc/settings_cubit/settings_cubit.dart';
+import 'package:google_tasks/presentation/bloc/settings_cubit/settings_state.dart';
 import 'package:google_tasks/presentation/router/router.dart';
 import 'package:google_tasks/service_locator.dart';
 
@@ -49,14 +51,19 @@ class AppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'Google Tasks Copy',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0099cc)),
-      ),
-      routerConfig: router,
+    return BlocProvider(
+      create: (_) => SettingsCubit(),
+      child:
+          BlocBuilder<SettingsCubit, SettingsState>(builder: (context, state) {
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          title: 'Google Tasks Copy',
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          themeMode: state.themeMode,
+          routerConfig: router,
+        );
+      }),
     );
   }
 }

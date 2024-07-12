@@ -106,10 +106,18 @@ class _MoreSheetState extends State<MoreSheet> {
                 ? () => deleteTaskList()
                 : null,
             highlightColor: widget.taskCategory.isDeleteable
-                ? Colors.black.withOpacity(0.09)
+                ? Theme.of(context)
+                    .textTheme
+                    .displayMedium
+                    ?.color
+                    ?.withOpacity(0.09)
                 : Colors.transparent,
             splashColor: widget.taskCategory.isDeleteable
-                ? Colors.black.withOpacity(0.09)
+                ? Theme.of(context)
+                    .textTheme
+                    .displayMedium
+                    ?.color
+                    ?.withOpacity(0.09)
                 : Colors.transparent,
             child: Container(
                 padding: const EdgeInsets.all(15),
@@ -117,8 +125,16 @@ class _MoreSheetState extends State<MoreSheet> {
                   Text("Удалить список",
                       style: TextStyle(
                           color: !widget.taskCategory.isDeleteable
-                              ? Colors.black26
-                              : Colors.black87))
+                              ? Theme.of(context)
+                                  .textTheme
+                                  .displayMedium
+                                  ?.color
+                                  ?.withOpacity(0.26)
+                              : Theme.of(context)
+                                  .textTheme
+                                  .displayMedium
+                                  ?.color
+                                  ?.withOpacity(0.87)))
                 ])),
           ),
           InkWell(
@@ -131,8 +147,16 @@ class _MoreSheetState extends State<MoreSheet> {
                   Text("Удалить выполненные задачи",
                       style: TextStyle(
                           color: completedTaskItems.isEmpty
-                              ? Colors.black26
-                              : Colors.black87))
+                              ? Theme.of(context)
+                                  .textTheme
+                                  .displayMedium
+                                  ?.color
+                                  ?.withOpacity(0.26)
+                              : Theme.of(context)
+                                  .textTheme
+                                  .displayMedium
+                                  ?.color
+                                  ?.withOpacity(0.87)))
                 ])),
           ),
         ],
