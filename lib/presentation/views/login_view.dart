@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_tasks/presentation/bloc/login_cubit/login_cubit.dart';
 import 'package:google_tasks/presentation/components/custom_textfield.dart';
 import 'package:google_tasks/presentation/screens/home_screen.dart';
-import 'package:google_tasks/service_locator.dart';
 import 'package:google_tasks/utils/enums/email_status.dart';
 import 'package:google_tasks/utils/enums/password_status.dart';
 
@@ -71,7 +70,7 @@ class _LoginViewState extends State<LoginView> {
                     debounce?.cancel();
                   }
                   debounce = Timer(const Duration(milliseconds: 300), () {
-                    serviceLocator<LoginCubit>().emailChanged(value);
+                    context.read<LoginCubit>().emailChanged(value);
                   });
                 },
               ),
@@ -90,26 +89,24 @@ class _LoginViewState extends State<LoginView> {
                       debounce?.cancel();
                     }
                     debounce = Timer(const Duration(milliseconds: 300), () {
-                      serviceLocator<LoginCubit>().passwordChanged(value);
+                      context.read<LoginCubit>().passwordChanged(value);
                     });
                   }),
               const SizedBox(
                 height: 20,
               ),
               TextButton(
-                onPressed: () async {
+                onPressed: () {
                   try {
-                    serviceLocator<LoginCubit>().login();
-                    if (context.mounted) {
-                      context.go(HomeScreen.route);
-                    }
+                    context
+                        .read<LoginCubit>()
+                        .login()
+                        .then((value) => context.go(HomeScreen.route));
                   } catch (e) {
-                    if (context.mounted) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => Text(e.toString()),
-                      );
-                    }
+                    showDialog(
+                      context: context,
+                      builder: (context) => Text(e.toString()),
+                    );
                   }
                 },
                 style: ButtonStyle(

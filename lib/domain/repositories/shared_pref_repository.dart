@@ -1,5 +1,11 @@
-abstract class SharedPreferencesRepository {
-  String? getLastTab();
+import 'package:google_tasks/utils/enums/sort_types.dart';
 
-  void setLastTab(String id);
+abstract class SharedPreferencesRepository {
+  int? getLastTab();
+
+  void setLastTab(int id);
+
+  void setFavoriteViewSort(SortTypes sortType);
+
+  int getFavoriteViewSort();
 }

@@ -109,3 +109,22 @@ final class GetSingleTask extends TaskEvent {
   @override
   List<Object> get props => [taskId];
 }
+
+final class ReorderTaskPosition extends TaskEvent {
+  final String categoryId;
+  final List<TaskItem> taskItems;
+
+  const ReorderTaskPosition(this.categoryId, this.taskItems);
+
+  @override
+  List<Object> get props => [categoryId, taskItems];
+}
+
+final class TaskCompleted extends TaskEvent {
+  final TaskItem taskItem;
+
+  const TaskCompleted(this.taskItem);
+
+  @override
+  List<Object> get props => [taskItem];
+}

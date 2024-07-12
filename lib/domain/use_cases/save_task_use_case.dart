@@ -17,6 +17,7 @@ class SaveTaskUseCase {
           id: uuid,
           userId: authRepository.userInfo.id,
           title: params.title,
+          content: params.content,
           category: params.category,
           isCompleted: params.isCompleted,
           isFavorite: params.isFavorite,

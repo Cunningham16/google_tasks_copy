@@ -1,8 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:google_tasks/domain/use_cases/register_use_case.dart';
-import 'package:google_tasks/domain/value_objects/email.dart';
-import 'package:google_tasks/domain/value_objects/password.dart';
 import 'package:google_tasks/utils/enums/email_status.dart';
 import 'package:google_tasks/utils/enums/form_status.dart';
 import 'package:google_tasks/utils/enums/password_status.dart';
@@ -21,25 +19,36 @@ class RegisterCubit extends Cubit<RegisterState> {
   }
 
   void emailChanged(String value) {
-    try {
-      Email email = Email((email) => email..value = value);
-      emit(state.copyWith(email: email, emailStatus: EmailStatus.valid));
-    } on ArgumentError {
+    final RegExp emailRegExp = RegExp(
+      r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+',
+    );
+
+    if (!emailRegExp.hasMatch(value)) {
       emit(state.copyWith(emailStatus: EmailStatus.invalid));
+    } else {
+      emit(state.copyWith(email: value, emailStatus: EmailStatus.valid));
     }
   }
 
   void passwordChanged(String value) {
-    try {
-      Password password = Password((password) => password..value = value);
-      emit(state.copyWith(
-          password: password, passwordStatus: PasswordStatus.valid));
-    } on ArgumentError {
+    if (value.length < 8) {
+      throw ArgumentError('Password must be at least 8 characters');
+    }
+
+    final RegExp passwordRegExp = RegExp(
+      r'^[a-zA-Z0-9]*$',
+    );
+
+    if (!passwordRegExp.hasMatch(value)) {
       emit(state.copyWith(emailStatus: EmailStatus.invalid));
+    } else {
+      emit(state.copyWith(
+          password: value, passwordStatus: PasswordStatus.valid));
     }
   }
 
   Future<void> register() async {
+    print(state);
     if (!(state.emailStatus == EmailStatus.valid) ||
         !(state.passwordStatus == PasswordStatus.valid)) {
       emit(state.copyWith(formStatus: FormStatus.invalid));

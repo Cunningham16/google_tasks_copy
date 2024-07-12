@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_tasks/domain/use_cases/save_category_use_case.dart';
+import 'package:google_tasks/domain/use_cases/category/save_category_use_case.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
+import 'package:google_tasks/presentation/cubit/home_page_cubit.dart';
 import 'package:google_tasks/utils/enums/sort_types.dart';
 
 import '../category_select_button.dart';
@@ -37,7 +38,8 @@ class _CategoryListSheetState extends State<CategoryListSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CategoryBloc, CategoryState>(builder: (context, state) {
+    return BlocBuilder<CurrentTabCubit, int>(builder: (context, state) {
+      CategoryBloc categoryBloc = context.read<CategoryBloc>();
       return Container(
         padding: const EdgeInsets.all(10),
         child: Column(
@@ -45,23 +47,20 @@ class _CategoryListSheetState extends State<CategoryListSheet> {
             CategorySelectButton(
               onTap: () => _animateToCategory(0),
               title: "Избранные",
-              iconInfo: widget.tabController.index == 0
-                  ? Icons.star
-                  : Icons.star_border_outlined,
+              iconInfo: state == 0 ? Icons.star : Icons.star_border_outlined,
             ),
             const Divider(),
             ListView.builder(
                 shrinkWrap: true,
-                itemCount: state.categoryList.length,
+                itemCount: categoryBloc.state.categoryList.length,
                 itemBuilder: (BuildContext context, int index) {
                   if (index == 0) {
                     return Container();
                   }
                   return CategorySelectButton(
                     onTap: () => _animateToCategory(index),
-                    title: state.categoryList[index].name,
-                    iconInfo:
-                        widget.tabController.index == index ? Icons.done : null,
+                    title: categoryBloc.state.categoryList[index].name,
+                    iconInfo: state == index ? Icons.done : null,
                   );
                 }),
             const Divider(),

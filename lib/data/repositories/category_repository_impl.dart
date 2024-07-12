@@ -5,11 +5,17 @@ import 'package:google_tasks/domain/repositories/category_repository.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
   final FirebaseFirestore _instanceStore = FirebaseFirestore.instance;
-  final FirebaseAuth _instanceAuth = FirebaseAuth.instance;
 
   @override
   Future<void> deleteCategory(String id) async {
-    await _instanceStore.collection("/categories").doc(id).delete();
+    final query = await _instanceStore
+        .collection("/categories")
+        .where("id", isEqualTo: id)
+        .get();
+    await _instanceStore
+        .collection("/categories")
+        .doc(query.docs[0].id)
+        .delete();
   }
 
   @override
@@ -21,9 +27,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
   @override
   Future<void> updateCategory(String id, TaskCategory modifiedCategory) async {
-    final updateDocRef = _instanceStore.collection("/categories").doc(id);
+    final updateDocRef = await _instanceStore
+        .collection("/categories")
+        .where("id", isEqualTo: id)
+        .get();
     await _instanceStore.runTransaction((transaction) async {
-      transaction.update(updateDocRef, modifiedCategory.toJson());
+      transaction.update(
+          updateDocRef.docs[0].reference, modifiedCategory.toJson());
     });
   }
 
@@ -31,13 +41,19 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Stream<List<TaskCategory>> watchCategories() {
     return _instanceStore
         .collection("/categories")
-        .where("userId", isEqualTo: _instanceAuth.currentUser!.uid)
+        .where("userId", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
         final category = doc.data();
         return TaskCategory.fromJson(category);
-      }).toList();
+      }).toList()
+        ..sort(((a, b) {
+          if (b.isFavoriteFlag) {
+            return 1;
+          }
+          return -1;
+        }));
     });
   }
 }

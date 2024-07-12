@@ -2,8 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_tasks/data/entities/task_category/task_category.dart';
 import 'package:google_tasks/domain/repositories/auth_repository.dart';
 import 'package:google_tasks/domain/repositories/category_repository.dart';
-import 'package:google_tasks/domain/value_objects/email.dart';
-import 'package:google_tasks/domain/value_objects/password.dart';
 import 'package:google_tasks/utils/enums/sort_types.dart';
 import 'package:uuid/uuid.dart';
 
@@ -18,8 +16,8 @@ class RegisterUseCase {
     try {
       UserCredential userCredential = await authRepository.register(
           email: params.email, password: params.password, name: params.name);
-      final uuidFavorite = const Uuid().v4();
       final uuidTasks = const Uuid().v4();
+      final uuidFavorite = const Uuid().v4();
 
       await categoryRepository.saveCategory(TaskCategory(
           id: uuidFavorite,
@@ -28,6 +26,7 @@ class RegisterUseCase {
           isDeleteable: false,
           sortType: SortTypes.byDate,
           isFavoriteFlag: true));
+
       await categoryRepository.saveCategory(TaskCategory(
           id: uuidTasks,
           userId: userCredential.user!.uid,
@@ -45,8 +44,8 @@ class RegisterUseCase {
 
 class RegisterParams {
   final String name;
-  final Email email;
-  final Password password;
+  final String email;
+  final String password;
 
   const RegisterParams(
       {required this.name, required this.email, required this.password});

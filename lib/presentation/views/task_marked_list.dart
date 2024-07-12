@@ -30,19 +30,18 @@ class _TaskMarkedListState extends State<TaskMarkedList> {
     Map<String, List<TaskItem>> map = {};
     map["Давно отмеченные"] = taskItems
         .where((element) =>
-            element.whenMarked != DateTime(1) &&
+            element.whenMarked != null &&
             DateFormat.MMMd().format(element.whenMarked!) !=
                 DateFormat.MMMd().format(DateTime.now()))
         .toList();
     map["Недавно отмеченные"] = taskItems
         .where((element) =>
-            element.whenMarked != DateTime(1) &&
+            element.whenMarked != null &&
             DateFormat.MMMd().format(element.whenMarked!) ==
                 DateFormat.MMMd().format(DateTime.now()))
         .toList();
-    map["Без пометки"] = taskItems
-        .where((element) => element.whenMarked == DateTime(1))
-        .toList();
+    map["Без пометки"] =
+        taskItems.where((element) => element.whenMarked == null).toList();
     map.removeWhere((key, value) => value.isEmpty);
     return map;
   }
@@ -88,7 +87,7 @@ class _TaskMarkedListState extends State<TaskMarkedList> {
                                           ..addAll(
                                               value.map((e) => GestureDetector(
                                                     onLongPress: () =>
-                                                        _showSnackBar,
+                                                        _showSnackBar(),
                                                     child: AppTask(
                                                       taskId: e.id,
                                                     ),

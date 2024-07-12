@@ -30,7 +30,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 RegistrationView(carouselController: carouselController)
               ],
               options: CarouselOptions(
-                  aspectRatio: 9 / 16,
+                  aspectRatio: 9 / 20,
                   scrollPhysics: const NeverScrollableScrollPhysics(),
                   autoPlay: false,
                   enlargeCenterPage: true,

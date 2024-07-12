@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_tasks/presentation/bloc/register_cubit/register_cubit.dart';
 import 'package:google_tasks/presentation/components/custom_textfield.dart';
 import 'package:google_tasks/presentation/screens/screens.dart';
-import 'package:google_tasks/service_locator.dart';
 import 'package:google_tasks/utils/enums/email_status.dart';
 import 'package:google_tasks/utils/enums/password_status.dart';
 
@@ -57,7 +56,7 @@ class _RegistrationViewState extends State<RegistrationView> {
               CustomTextField(
                 labelText: "Имя",
                 onChanged: (value) =>
-                    serviceLocator<RegisterCubit>().nameChanged(value),
+                    context.read<RegisterCubit>().nameChanged(value),
               ),
               const SizedBox(
                 height: 10,
@@ -72,7 +71,7 @@ class _RegistrationViewState extends State<RegistrationView> {
                       debounce?.cancel();
                     }
                     debounce = Timer(const Duration(milliseconds: 300), () {
-                      serviceLocator<RegisterCubit>().emailChanged(value);
+                      context.read<RegisterCubit>().emailChanged(value);
                     });
                   }),
               const SizedBox(
@@ -89,7 +88,7 @@ class _RegistrationViewState extends State<RegistrationView> {
                       debounce?.cancel();
                     }
                     debounce = Timer(const Duration(milliseconds: 300), () {
-                      serviceLocator<RegisterCubit>().passwordChanged(value);
+                      context.read<RegisterCubit>().passwordChanged(value);
                     });
                   }),
               const SizedBox(
@@ -98,10 +97,8 @@ class _RegistrationViewState extends State<RegistrationView> {
               TextButton(
                 onPressed: () {
                   try {
-                    serviceLocator<RegisterCubit>().register();
-                    if (context.mounted) {
-                      context.go(HomeScreen.route);
-                    }
+                    context.read<RegisterCubit>().register();
+                    context.go(HomeScreen.route);
                   } catch (e) {
                     showDialog(
                       context: context,

@@ -1,3 +1,5 @@
+import "dart:developer";
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/data/entities/task_item/task_item.dart';
@@ -16,30 +18,28 @@ class TaskNormalList extends StatefulWidget {
 }
 
 class _TaskNormalListState extends State<TaskNormalList> {
-  bool isStateChangingFast = false;
-  List<TaskItem> uncompleted = [];
+  bool isStateChanging = false;
+  List<TaskItem> uncompletedList = [];
 
   @override
   void initState() {
-    setState(() {
-      uncompleted =
-          widget.taskItems.where((element) => !element.isCompleted).toList();
-      uncompleted.sort(
-        (a, b) => a.position.compareTo(b.position),
-      );
-    });
+    setState(
+      () {
+        uncompletedList =
+            widget.taskItems.where((element) => !element.isCompleted).toList();
+        uncompletedList.sort((a, b) => a.position.compareTo(b.position));
+      },
+    );
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant TaskNormalList oldWidget) {
-    if (!isStateChangingFast) {
+    if (!isStateChanging) {
       setState(() {
-        uncompleted =
+        uncompletedList =
             widget.taskItems.where((element) => !element.isCompleted).toList();
-        uncompleted.sort(
-          (a, b) => a.position.compareTo(b.position),
-        );
+        uncompletedList.sort((a, b) => a.position.compareTo(b.position));
       });
     }
     super.didUpdateWidget(oldWidget);
@@ -49,28 +49,26 @@ class _TaskNormalListState extends State<TaskNormalList> {
     final TaskBloc taskBloc = context.read<TaskBloc>();
 
     if (oldIndex < newIndex) {
-      newIndex -= 1;
+      newIndex--;
     }
+
+    print(oldIndex);
+    print(newIndex);
+
+    log("hello there");
 
     setState(() {
-      TaskItem item = uncompleted.removeAt(oldIndex);
-      uncompleted.insert(newIndex, item);
+      isStateChanging = true;
+      final item = uncompletedList.removeAt(oldIndex);
+      uncompletedList.insert(newIndex, item);
     });
 
-    for (int i = 0; i < uncompleted.length; i++) {
-      if (i == 0) {
-        setState(() {
-          isStateChangingFast = true;
-        });
-      }
-      taskBloc.add(TaskUpdated(uncompleted.toList()[i].copyWith(position: i),
-          uncompleted.toList()[i].id));
-      if (i == uncompleted.length - 1) {
-        setState(() {
-          isStateChangingFast = false;
-        });
-      }
-    }
+    taskBloc.add(ReorderTaskPosition(
+        uncompletedList[oldIndex].category, uncompletedList));
+
+    setState(() {
+      isStateChanging = false;
+    });
   }
 
   @override
@@ -88,18 +86,17 @@ class _TaskNormalListState extends State<TaskNormalList> {
               physics: const BouncingScrollPhysics(),
               children: [
                 ReorderableListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    itemCount: uncompleted.length,
+                    itemCount: uncompletedList.length,
                     onReorder: (int oldIndex, int newIndex) =>
-                        reorderUnompletedTasks,
+                        reorderUnompletedTasks(oldIndex, newIndex),
                     buildDefaultDragHandles: false,
                     itemBuilder: (context, index) =>
                         ReorderableDragStartListener(
-                          key: Key("${uncompleted[index].id}"),
                           index: index,
+                          key: Key(uncompletedList[index].id),
                           child: AppTask(
-                            taskId: uncompleted[index].id,
+                            taskId: uncompletedList[index].id,
                           ),
                         )),
                 if (completed.isNotEmpty)

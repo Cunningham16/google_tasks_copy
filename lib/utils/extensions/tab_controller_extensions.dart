@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 extension TabControllerExtensions on TabController {
   void onIndexChange(final void Function() callback) {
     addListener(() {
-      if (indexIsChanging || index != previousIndex) {
+      if (indexIsChanging || animation!.value.round() != previousIndex) {
         callback();
       }
     });

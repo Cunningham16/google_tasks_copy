@@ -28,10 +28,10 @@ class _TaskDateListState extends State<TaskDateList> {
 
   Map<String, List<TaskItem>> groupListByDate(List<TaskItem> taskItems) {
     taskItems.sort((a, b) {
-      if (a.date == DateTime(1)) {
+      if (a.date == null) {
         return 1;
       }
-      if (b.date == DateTime(1)) {
+      if (b.date == null) {
         return 1;
       }
       return a.date!.compareTo(b.date!);
@@ -44,11 +44,11 @@ class _TaskDateListState extends State<TaskDateList> {
     for (int i = 0; i < list.length; i++) {
       if (list[i] == null) {
         map["Без даты"] =
-            taskItems.where((element) => element.date == DateTime(1)).toList();
+            taskItems.where((element) => element.date == null).toList();
       } else {
         map[DateFormat.MMMd().format(list[i]!)] = taskItems
             .where((element) =>
-                element.date != DateTime(1) &&
+                element.date != null &&
                 DateFormat.MMMd().format(element.date!) ==
                     DateFormat.MMMd().format(list[i]!))
             .toList();
@@ -99,7 +99,7 @@ class _TaskDateListState extends State<TaskDateList> {
                                         ..addAll(value
                                             .map((taskItem) => GestureDetector(
                                                   onLongPress: () =>
-                                                      showSnackbar,
+                                                      showSnackbar(),
                                                   child: AppTask(
                                                       taskId: taskItem.id,
                                                       hideChip: true),

@@ -1,7 +1,6 @@
+import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_tasks/domain/repositories/auth_repository.dart';
-import 'package:google_tasks/domain/value_objects/email.dart';
-import 'package:google_tasks/domain/value_objects/password.dart';
 
 class LoginUseCase {
   final AuthRepository authRepository;
@@ -15,14 +14,15 @@ class LoginUseCase {
     } on ArgumentError catch (e) {
       throw Exception(e.message);
     } catch (e) {
+      log(e.toString());
       throw Exception(e);
     }
   }
 }
 
 class LoginParams {
-  final Email email;
-  final Password password;
+  final String email;
+  final String password;
 
   LoginParams({required this.email, required this.password});
 }

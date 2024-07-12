@@ -7,7 +7,7 @@ import 'package:google_tasks/domain/repositories/auth_repository.dart';
 import 'package:google_tasks/domain/repositories/category_repository.dart';
 import 'package:google_tasks/domain/repositories/shared_pref_repository.dart';
 import 'package:google_tasks/domain/repositories/task_repository.dart';
-import 'package:google_tasks/domain/use_cases/delete_category_use_case.dart';
+import 'package:google_tasks/domain/use_cases/category/delete_category_use_case.dart';
 import 'package:google_tasks/domain/use_cases/delete_task_use_case.dart';
 import 'package:google_tasks/domain/use_cases/delete_tasks_by_category_use_case.dart';
 import 'package:google_tasks/domain/use_cases/delete_tasks_by_completed_use_case.dart';
@@ -15,48 +15,21 @@ import 'package:google_tasks/domain/use_cases/get_single_task_use_case.dart';
 import 'package:google_tasks/domain/use_cases/login_use_case.dart';
 import 'package:google_tasks/domain/use_cases/logout_use_case.dart';
 import 'package:google_tasks/domain/use_cases/register_use_case.dart';
-import 'package:google_tasks/domain/use_cases/save_category_use_case.dart';
+import 'package:google_tasks/domain/use_cases/category/save_category_use_case.dart';
+import 'package:google_tasks/domain/use_cases/reorder_task_list_use_case.dart';
 import 'package:google_tasks/domain/use_cases/save_task_use_case.dart';
 import 'package:google_tasks/domain/use_cases/stream_app_user_use_case.dart';
-import 'package:google_tasks/domain/use_cases/update_category_use_case.dart';
+import 'package:google_tasks/domain/use_cases/category/update_category_use_case.dart';
 import 'package:google_tasks/domain/use_cases/update_task_use_case.dart';
 import 'package:google_tasks/domain/use_cases/watch_all_tasks_use_case.dart';
-import 'package:google_tasks/domain/use_cases/watch_categories_use_case.dart';
-import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
-import 'package:google_tasks/presentation/bloc/login_cubit/login_cubit.dart';
-import 'package:google_tasks/presentation/bloc/register_cubit/register_cubit.dart';
-import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
-import 'package:google_tasks/presentation/cubit/home_page_cubit.dart';
+import 'package:google_tasks/domain/use_cases/category/watch_categories_use_case.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //TODO: Переделать руты
 
 final serviceLocator = GetIt.instance;
 
 initServiceLocator() async {
-  //Blocs
-  serviceLocator.registerFactory<TaskBloc>(() => TaskBloc(
-      saveTaskUseCase: serviceLocator(),
-      deleteTaskUseCase: serviceLocator(),
-      updateTaskUseCase: serviceLocator(),
-      watchAllTasksUseCase: serviceLocator(),
-      getSingleTaskUseCase: serviceLocator(),
-      deleteTasksByCategoryUseCase: serviceLocator(),
-      deleteTasksByCompletedUseCase: serviceLocator()));
-
-  serviceLocator.registerFactory<CategoryBloc>(() => CategoryBloc(
-      deleteCategoryUseCase: serviceLocator(),
-      saveCategoryUseCase: serviceLocator(),
-      updateCategoryUseCase: serviceLocator(),
-      watchCategoriesUseCase: serviceLocator()));
-
-  serviceLocator
-      .registerFactory(() => RegisterCubit(registerUseCase: serviceLocator()));
-
-  serviceLocator
-      .registerFactory(() => LoginCubit(loginUseCase: serviceLocator()));
-
-  serviceLocator.registerFactory(() => CurrentTabCubit());
-
   //Repositories
   serviceLocator
       .registerLazySingleton<TaskRepository>(() => TaskRepositoryImpl());
@@ -67,10 +40,19 @@ initServiceLocator() async {
   serviceLocator
       .registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl());
 
-  serviceLocator.registerLazySingleton<SharedPreferencesRepository>(
-      () => SharedPrefRepositoryImpl());
+  serviceLocator.registerLazySingletonAsync<SharedPreferences>(
+      () => SharedPreferences.getInstance());
+
+  await serviceLocator.isReady<SharedPreferences>();
+
+  serviceLocator.registerLazySingleton<SharedPreferencesRepository>(() {
+    return SharedPrefRepositoryImpl(sp: serviceLocator());
+  });
 
   //Use cases
+  serviceLocator.registerLazySingleton(
+      () => ReorderTaskListUseCase(taskRepository: serviceLocator()));
+
   serviceLocator.registerLazySingleton(
       () => DeleteCategoryUseCase(categoryRepository: serviceLocator()));
 

@@ -3,24 +3,27 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/data/entities/task_category/task_category.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
 import 'package:google_tasks/presentation/components/sheets/sort_sheet.dart';
-import 'package:google_tasks/presentation/cubit/home_page_cubit.dart';
 import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
+import 'package:google_tasks/presentation/cubit/home_page_cubit.dart';
 
 import 'sheets/category_list_sheet.dart';
 import 'sheets/create_task_sheet.dart';
 import 'sheets/more_sheet.dart';
 
-class BottomBar extends StatelessWidget {
-  const BottomBar({super.key, required this.tabController});
+class BottomBar extends StatefulWidget {
+  const BottomBar({super.key});
 
-  final TabController tabController;
+  @override
+  State<BottomBar> createState() => _BottomBarState();
+}
 
+class _BottomBarState extends State<BottomBar> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CategoryBloc, CategoryState>(builder: (context, state) {
-      int taskCategoryIndex = state.categoryList.indexWhere(
-          (element) => element.id == context.watch<CurrentTabCubit>().state);
-      TaskCategory taskCategory = state.categoryList[taskCategoryIndex];
+      int tabIndex = context.watch<CurrentTabCubit>().state;
+      TaskCategory taskCategory = state.categoryList[tabIndex];
+
       return BottomAppBar(
           child: Row(
         children: [
@@ -29,7 +32,7 @@ class BottomBar extends StatelessWidget {
               _displayBottomSheet(
                   context,
                   CategoryListSheet(
-                    tabController: tabController,
+                    tabController: DefaultTabController.of(context),
                   ));
             },
             icon: const Icon(
@@ -42,21 +45,23 @@ class BottomBar extends StatelessWidget {
               _displayBottomSheet(
                   context,
                   SortSheet(
-                      category: taskCategory, tabController: tabController));
+                    tabIndex: tabIndex,
+                    category: taskCategory,
+                  ));
             },
             icon: const Icon(
               Icons.swap_vert,
               size: 25,
             ),
           ),
-          if (tabController.index == 0)
+          if (tabIndex != 0)
             IconButton(
               onPressed: () {
                 _displayBottomSheet(
                     context,
                     MoreSheet(
-                      tabController: tabController,
                       taskCategory: taskCategory,
+                      tabController: DefaultTabController.of(context),
                     ));
               },
               icon: const Icon(
@@ -71,7 +76,7 @@ class BottomBar extends StatelessWidget {
               _displayBottomSheet(
                   context,
                   CreateTaskSheet(
-                    isFavoriteFlag: tabController.index == 0,
+                    isFavoriteFlag: tabIndex == 0,
                     taskCount: context
                         .read<TaskBloc>()
                         .state

@@ -14,4 +14,6 @@ abstract class TaskRepository {
   Future<void> deleteTasksByCategory(String categoryId);
 
   Stream<List<TaskItem>> watchAllTasks();
+
+  Future<void> reorderListTasks(String categoryId, List<TaskItem> taskItems);
 }

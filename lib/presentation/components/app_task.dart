@@ -6,7 +6,6 @@ import 'package:google_tasks/data/entities/task_item/task_item.dart';
 import 'package:intl/intl.dart';
 
 import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
-import 'package:google_tasks/presentation/screens/screens.dart';
 
 class AppTask extends StatelessWidget {
   const AppTask({
@@ -28,7 +27,7 @@ class AppTask extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              context.go(TaskDetails.route);
+              context.pushNamed("details", pathParameters: {"id": taskId});
             },
             child: Container(
               padding: const EdgeInsets.all(6),
@@ -38,8 +37,29 @@ class AppTask extends StatelessWidget {
                   Checkbox(
                     value: taskItem.isCompleted,
                     onChanged: (bool? value) {
-                      context.read<TaskBloc>().add(TaskCompletionToggled(
-                          taskItem, !taskItem.isCompleted));
+                      if (!taskItem.isCompleted) {
+                        context.read<TaskBloc>().add(TaskCompleted(taskItem));
+
+                        context.read<TaskBloc>().add(TaskUpdated(
+                            taskItem.copyWith(
+                                isCompleted: !taskItem.isCompleted,
+                                position: 0),
+                            taskItem.id));
+                      } else {
+                        int taskCount = context
+                                .read<TaskBloc>()
+                                .state
+                                .taskList
+                                .where((element) =>
+                                    element.category == taskItem.category)
+                                .length -
+                            1;
+                        context.read<TaskBloc>().add(TaskUpdated(
+                            taskItem.copyWith(
+                                isCompleted: !taskItem.isCompleted,
+                                position: taskCount),
+                            taskItem.id));
+                      }
                     },
                     shape: const CircleBorder(),
                   ),
@@ -84,7 +104,7 @@ class AppTask extends StatelessWidget {
                   IconButton(
                       onPressed: () {
                         final dateFavorite =
-                            !taskItem.isFavorite ? DateTime.now() : DateTime(1);
+                            !taskItem.isFavorite ? DateTime.now() : null;
                         context.read<TaskBloc>().add(TaskUpdated(
                             taskItem.copyWith(
                                 isFavorite: !taskItem.isFavorite,

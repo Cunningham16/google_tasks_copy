@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_tasks/data/entities/task_category/task_category.dart';
 import 'package:google_tasks/data/entities/task_item/task_item.dart';
-import 'package:google_tasks/domain/use_cases/update_category_use_case.dart';
+import 'package:google_tasks/domain/use_cases/category/update_category_use_case.dart';
 import 'package:google_tasks/presentation/bloc/category_bloc/category_bloc.dart';
 import 'package:google_tasks/presentation/bloc/task_bloc/tasks_bloc.dart';
 
@@ -103,7 +103,7 @@ class _MoreSheetState extends State<MoreSheet> {
           ),
           InkWell(
             onTap: widget.taskCategory.isDeleteable
-                ? () async => deleteTaskList
+                ? () => deleteTaskList()
                 : null,
             highlightColor: widget.taskCategory.isDeleteable
                 ? Colors.black.withOpacity(0.09)
@@ -123,7 +123,7 @@ class _MoreSheetState extends State<MoreSheet> {
           ),
           InkWell(
             onTap: completedTaskItems.isNotEmpty
-                ? () async => deleteCompletedTasks
+                ? () => deleteCompletedTasks()
                 : null,
             child: Container(
                 padding: const EdgeInsets.all(15),

@@ -1,8 +1,10 @@
 import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_tasks/domain/repositories/shared_pref_repository.dart';
 import 'package:google_tasks/firebase_options.dart';
 import 'package:google_tasks/presentation/router/router.dart';
 import 'package:google_tasks/service_locator.dart';
@@ -15,10 +17,21 @@ void main() async {
   );
 
   await initServiceLocator();
+  await serviceLocator.allReady();
+
+  if (serviceLocator<SharedPreferencesRepository>().getLastTab() == null) {
+    serviceLocator<SharedPreferencesRepository>().setLastTab(0);
+  }
 
   FlutterError.onError = (details) {
     log(details.exceptionAsString(), stackTrace: details.stack);
   };
+
+  FirebaseAuth.instance.authStateChanges().listen((event) {
+    router.refresh();
+  });
+
+  SimpleBlocObserver();
 
   runApp(const AppView());
 }

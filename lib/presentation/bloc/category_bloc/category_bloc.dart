@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_tasks/data/entities/task_category/task_category.dart';
-import 'package:google_tasks/domain/use_cases/delete_category_use_case.dart';
-import 'package:google_tasks/domain/use_cases/save_category_use_case.dart';
-import 'package:google_tasks/domain/use_cases/update_category_use_case.dart';
-import 'package:google_tasks/domain/use_cases/watch_categories_use_case.dart';
+import 'package:google_tasks/domain/use_cases/category/delete_category_use_case.dart';
+import 'package:google_tasks/domain/use_cases/category/save_category_use_case.dart';
+import 'package:google_tasks/domain/use_cases/category/update_category_use_case.dart';
+import 'package:google_tasks/domain/use_cases/category/watch_categories_use_case.dart';
 
 part "category_event.dart";
 part "category_state.dart";

@@ -5,6 +5,7 @@ import 'package:google_tasks/domain/use_cases/delete_task_use_case.dart';
 import 'package:google_tasks/domain/use_cases/delete_tasks_by_category_use_case.dart';
 import 'package:google_tasks/domain/use_cases/delete_tasks_by_completed_use_case.dart';
 import 'package:google_tasks/domain/use_cases/get_single_task_use_case.dart';
+import 'package:google_tasks/domain/use_cases/reorder_task_list_use_case.dart';
 import 'package:google_tasks/domain/use_cases/save_task_use_case.dart';
 import 'package:google_tasks/domain/use_cases/update_task_use_case.dart';
 import 'package:google_tasks/domain/use_cases/watch_all_tasks_use_case.dart';
@@ -20,6 +21,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   final GetSingleTaskUseCase getSingleTaskUseCase;
   final DeleteTasksByCategoryUseCase deleteTasksByCategoryUseCase;
   final DeleteTasksByCompletedUseCase deleteTasksByCompletedUseCase;
+  final ReorderTaskListUseCase reorderTaskListUseCase;
 
   TaskBloc(
       {required this.saveTaskUseCase,
@@ -28,7 +30,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       required this.watchAllTasksUseCase,
       required this.getSingleTaskUseCase,
       required this.deleteTasksByCategoryUseCase,
-      required this.deleteTasksByCompletedUseCase})
+      required this.deleteTasksByCompletedUseCase,
+      required this.reorderTaskListUseCase})
       : super(const TaskState()) {
     on<TaskSubscribtionRequested>(_onTaskSubcriptionRequested);
     on<TaskCreated>(_onTaskCreated);
@@ -43,6 +46,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<TaskUpdatedCategoryDump>(_onTaskUpdatedCategoryDump);
     on<TasksDeletedByCategory>(_onTasksDeletedByCategory);
     on<GetSingleTask>(_onGetSingleTask);
+    on<ReorderTaskPosition>(_onReorderTaskPosition);
+    on<TaskCompleted>(_onTaskCompleted);
   }
 
   Future<void> _onTaskSubcriptionRequested(
@@ -72,6 +77,13 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       TaskUpdated event, Emitter<TaskState> emit) async {
     await updateTaskUseCase(
         UpdateTaskParams(id: event.index, taskItem: event.newTaskItem));
+  }
+
+  Future<void> _onTaskCompleted(
+      TaskCompleted event, Emitter<TaskState> emit) async {
+    emit(state.copyWith(
+      lastCompletedTask: () => event.taskItem,
+    ));
   }
 
   Future<void> _onTaskUndoChanged(
@@ -105,7 +117,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       TaskUpdatedCategoryUndo event, Emitter<TaskState> emit) async {
     await updateTaskUseCase(UpdateTaskParams(
         id: state.lastUpdatedCategoryTask!.id,
-        taskItem: state.lastCompletedTask!));
+        taskItem: state.lastUpdatedCategoryTask!));
   }
 
   Future<void> _onTaskUpdatedCategoryDump(
@@ -116,5 +128,11 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   Future<void> _onTasksDeletedByCategory(
       TasksDeletedByCategory event, Emitter<TaskState> emit) async {
     await deleteTasksByCategoryUseCase(categoryId: event.categoryId);
+  }
+
+  Future<void> _onReorderTaskPosition(
+      ReorderTaskPosition event, Emitter<TaskState> emit) async {
+    await reorderTaskListUseCase(ReorderTaskListParams(
+        categoryId: event.categoryId, taskItems: event.taskItems));
   }
 }

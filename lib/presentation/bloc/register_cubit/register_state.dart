@@ -2,8 +2,8 @@ part of "register_cubit.dart";
 
 class RegisterState extends Equatable {
   final String? name;
-  final Email? email;
-  final Password? password;
+  final String? email;
+  final String? password;
   final FormStatus formStatus;
   final EmailStatus emailStatus;
   final PasswordStatus passwordStatus;
@@ -18,8 +18,8 @@ class RegisterState extends Equatable {
 
   RegisterState copyWith({
     String? name,
-    Email? email,
-    Password? password,
+    String? email,
+    String? password,
     FormStatus? formStatus,
     EmailStatus? emailStatus,
     PasswordStatus? passwordStatus,

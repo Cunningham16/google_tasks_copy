@@ -9,7 +9,11 @@ class TaskRepositoryImpl implements TaskRepository {
 
   @override
   Future<void> deleteTask(String id) async {
-    await _instanceStore.collection("/tasks").doc(id).delete();
+    final query = await _instanceStore
+        .collection("/tasks")
+        .where("id", isEqualTo: id)
+        .get();
+    await _instanceStore.collection("/tasks").doc(query.docs[0].id).delete();
   }
 
   @override
@@ -36,9 +40,12 @@ class TaskRepositoryImpl implements TaskRepository {
 
   @override
   Future<void> updateTask(String id, TaskItem taskItem) async {
-    final updateDocRef = _instanceStore.collection("/tasks").doc(id);
+    final updateDocRef = await _instanceStore
+        .collection("/tasks")
+        .where("id", isEqualTo: id)
+        .get();
     await _instanceStore.runTransaction((transaction) async {
-      transaction.update(updateDocRef, taskItem.toJson());
+      transaction.update(updateDocRef.docs[0].reference, taskItem.toJson());
     });
   }
 
@@ -76,5 +83,30 @@ class TaskRepositoryImpl implements TaskRepository {
       batch.delete(doc.reference);
     }
     await batch.commit();
+  }
+
+  // taskItem без изменений, оно само сделается
+  @override
+  Future<void> reorderListTasks(
+      String categoryId, List<TaskItem> taskItems) async {
+    final batch = _instanceStore.batch();
+    final collection = await _instanceStore
+        .collection("/tasks")
+        .where(Filter.and(
+          Filter("userId", isEqualTo: _instanceAuth.currentUser!.uid),
+          Filter("category", isEqualTo: categoryId),
+        ))
+        .get();
+
+    for (int i = 0; i < taskItems.length; i++) {
+      batch.update(
+          collection.docs
+              .firstWhere((element) =>
+                  TaskItem.fromJson(element.data()).id == taskItems[i].id)
+              .reference,
+          taskItems[i].copyWith(position: i).toJson());
+    }
+
+    batch.commit();
   }
 }
